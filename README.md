@@ -13,21 +13,16 @@ The Source Files for ATL Transformation
 
 In this section, the source files for ATL transformation is presented, which consists of 2 metamodels(ER and REL), and 6 ATL matched rules. They form the input of VeriATL verification system.
 
-Source & Target Metamodel
-ATL Transformation Specification
+- [Source](https://github.com/VeriATL/VeriATL/blob/master/sources/ER.ecore) & [Target Metamodel](https://github.com/VeriATL/VeriATL/blob/master/sources/REL.ecore)
+- [ATL Transformation Specification](https://github.com/VeriATL/VeriATL/blob/master/sources/er2rel.atl)
 
 The Generated Boogie files
 ------
 The source files for ATL transformation is translated into the following Boogie files, which are send to the Boogie verifier to verify the operational correctness of ATL matched rules. Our verification result is a either a confirmation that the ATL matched rules are operationally correct, or trace information from Boogie verifier that leads to the operational incorrectness.
 
-Metamodels
-ATL Rules:
-S2S: Apply / Match
-E2R: Apply / Match
-R2R: Apply / Match
-EA2A: Apply / Match
-RA2A: Apply / Match
-RA2AK: Apply / Match
+- [Metamodels](https://github.com/VeriATL/VeriATL/blob/master/Metamodels.bpl)
+- [ATL Rules](https://github.com/VeriATL/VeriATL/tree/master/generated)
+- [Rule Conflict](https://github.com/VeriATL/VeriATL/blob/master/generated/match_conflict_demo.bpl)
 
 
 The Auxiliary Boogie Files
@@ -35,17 +30,15 @@ The Auxiliary Boogie Files
 
 During the verification of operational correctness of ATL matched rules, the following Boogie library needs to be imported:
 
-ASM Bytecode Axiomatization
-Library for OCL
-ATL-specific Library Axiomatization
+- [ASM Bytecode Axiomatization](https://github.com/VeriATL/VeriATL/blob/master/instr.bpl)
+- [Library for OCL](https://github.com/VeriATL/VeriATL/blob/master/LibOCL.bpl)
+- [ATL-specific Library Axiomatization](https://github.com/VeriATL/VeriATL/blob/master/NativeLib.bpl)
 
 How to Use
 ------
-First, here is package that contains all the files to reproduce the verification result. [Download]
-
 One way to reproduce the verification result is when the user have the Boogie & Z3 installed, using the following command:
 
-boogie.exe Preludes/LibOCL.bpl Preludes/NativeLib.bpl Preludes/instr.bpl Metamodels.bpl $(FILE_NAME)
+* boogie.exe Preludes/LibOCL.bpl Preludes/NativeLib.bpl Preludes/instr.bpl Metamodels.bpl $(FILE_NAME)
 
 e.g.
-boogie.exe Preludes/LibOCL.bpl Preludes/NativeLib.bpl Preludes/instr.bpl Metamodels.bpl matchS2S.bpl
+* boogie.exe Preludes/LibOCL.bpl Preludes/NativeLib.bpl Preludes/instr.bpl Metamodels.bpl matchS2S.bpl
