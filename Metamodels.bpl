@@ -1,12 +1,33 @@
+// here are metamodel inferences that are missing currently,
+/*
+
+- the outcome of read an [association],
+	[1] null
+	- allocated array, of type class._System.array, index is int
+		[2] length 0
+		- length > 0
+			- each elem in this array, have certain dtype defined by metamodel, <static properties>
+			- eopposite
+			
+[1] M dont have association rel
+<M>
+</M>		
+[2] M have association rel, but it is empty
+<M><rels></rels></M>
+*/
+
+
 
 // ------------------------------------------------------------
 // -- Source Metamodel Modelling ------------------------------
 // ------------------------------------------------------------
-const unique ER$Entity: TName;
-const unique ER$Relship: TName;
-const unique ER$ERSchema: TName;
-const unique ER$ERAttribute: TName;
-const unique ER$RelshipEnd: TName;
+const unique ER$Entity: ClassName;
+const unique ER$Relship: ClassName;
+const unique ER$ERSchema: ClassName;
+const unique ER$ERAttribute: ClassName;
+const unique ER$RelshipEnd: ClassName;
+
+const unique ERSchema.name: Field String;
 
 const unique Entity.name: Field String;
 const unique Relship.name: Field String;
@@ -14,38 +35,40 @@ const unique RelshipEnd.name: Field String;
 const unique ERAttribute.name: Field String;
 const unique ERAttribute.isKey: Field bool;
 
-
-const unique ERSchema.entities: Field (Set ref);		// typeof(ref) == ER!Entity forall ref in Set ref
+// TODO: change set to ref => where a#0 == null || (read($Heap, a#0, alloc) && dtype(a#0) == class._System.array && TypeParams(a#0, 0) == class._System.int)
+const unique ERSchema.entities: Field ref;		// typeof(ref) == ER!Entity forall ref in Set ref
 const unique Entity.schema: Field ref;					// typeof(ref) == ER!ERSchema
 
-const unique ERSchema.relships: Field (Set ref);		// typeof(ref) == ER!Relship forall ref in Set ref
+const unique ERSchema.relships: Field ref;		// typeof(ref) == ER!Relship forall ref in Set ref
 const unique Relship.schema: Field ref;					// typeof(ref) == ER!ERSchema
 
-const unique Entity.ends: Field (Set ref);				// typeof(ref) == ER!RelshipEnd
+const unique Entity.ends: Field ref;				// typeof(ref) == ER!RelshipEnd
 const unique RelshipEnd.entity: Field ref;				// typeof(ref) == ER!Entity
-const unique Entity.attrs: Field (Set ref);				// typeof(ref) == ER!ERAttribute
+const unique Entity.attrs: Field ref;				// typeof(ref) == ER!ERAttribute
 const unique ERAttribute.entity: Field ref;				// typeof(ref) == ER!entity
 
-const unique Relship.attrs: Field (Set ref);			// typeof(ref) == ER!ERAttribute
+const unique Relship.attrs: Field ref;			// typeof(ref) == ER!ERAttribute
 const unique RelshipEnd.relship: Field ref;				// typeof(ref) == ER!Relship
-const unique Relship.ends: Field (Set ref);				// typeof(ref) == ER!RelshipEnd
+const unique Relship.ends: Field ref;				// typeof(ref) == ER!RelshipEnd
 const unique ERAttribute.relship: Field ref;			// typeof(ref) == ER!Relship
 
 // ------------------------------------------------------------
 // -- Target Metamodel Modelling ------------------------------
 // ------------------------------------------------------------
-const unique REL$RELAttribute: TName;
-const unique REL$Relation: TName;
-const unique REL$RELSchema: TName;
+const unique REL$RELAttribute: ClassName;
+const unique REL$Relation: ClassName;
+const unique REL$RELSchema: ClassName;
+
+const unique RELSchema.name: Field String;
 
 const unique Relation.name: Field String;
 const unique RELAttribute.name: Field String;
 const unique RELAttribute.isKey: Field bool;
 
-const unique RELSchema.relations: Field (Set ref);
+const unique RELSchema.relations: Field ref;
 const unique Relation.schema: Field ref;
 
-const unique Relation.attrs: Field (Set ref);
+const unique Relation.attrs: Field ref;
 const unique RELAttribute.relation: Field ref;
 
 // ---------------------------------------------------------------
@@ -53,14 +76,20 @@ const unique RELAttribute.relation: Field ref;
 // ---------------------------------------------------------------
 
 // the const string declared in this part are referred in ASM for the string of field
-const unique _Field$name: String;
-const unique _Field$isKey: bool;
-const unique _Field$relship: ref;
-const unique _Field$relation: ref;
-const unique _Field$entity: ref;
-const unique _Field$schema: ref;
+const unique _Field$name: NameFamily;
+const unique _Field$isKey: NameFamily;
+const unique _Field$relship: NameFamily;
+const unique _Field$relation: NameFamily;
+const unique _Field$entity: NameFamily;
+const unique _Field$schema: NameFamily;
 
-const unique _Field$links: Set ref;
+const unique _Field$entities: NameFamily;
+const unique _Field$relships: NameFamily;
+
+const unique _Field$relations: NameFamily;
+
+
+const unique _Field$links: NameFamily;
 
 // the const string declared in this part are referred in ASM for the string of rule's entity
 const unique _att: String;
@@ -107,26 +136,17 @@ const unique _#native: String;
 // -- Auxulary Type/Data Structure Modelling ---------------------
 // ---------------------------------------------------------------
 
-// global model store
-var Heap : HeapType where $IsGoodHeap(Heap);
 
-
-type BOOL;
-type TName;
 
 
 
 // ASM-specific
-const unique TRUE: BOOL;
-const unique FALSE: BOOL;
 const unique Asm: ref;
+  axiom Asm != null;
 const unique ASM#Links : Field (Set ref);
-const unique Native$TransientLink: TName;
+const unique Native$TransientLink: ClassName;
 
-const unique Type#String: TName;
-const unique Type#Integer: TName;
-const unique Type#Boolean: TName;
-const unique Type#Ref: TName;
+
 
 	// see org.eclipse.m2m.atl.engine.emfvm.lib.TransientLink
 const unique TransientLink#source: Field (Map String ref);
@@ -136,27 +156,31 @@ const unique TransientLink#rule: Field String;
 
 
 
-function getFieldByName<alpha>(TName, alpha): Field alpha;
-  axiom (getFieldByName(ER$Entity, _Field$name) == Entity.name);
-  axiom (getFieldByName(ER$Entity, _Field$schema) == Entity.schema);
-  axiom (getFieldByName(ER$ERAttribute, _Field$entity) == ERAttribute.entity);
-  axiom (getFieldByName(ER$ERAttribute, _Field$relship) == ERAttribute.relship);
-  axiom (getFieldByName(ER$ERAttribute, _Field$name) == ERAttribute.name);
-  axiom (getFieldByName(ER$ERAttribute, _Field$isKey) == ERAttribute.isKey);
-  axiom (getFieldByName(ER$RelshipEnd, _Field$entity) == RelshipEnd.entity);
-  axiom (getFieldByName(ER$Relship, _Field$name) == Relship.name);
-  axiom (getFieldByName(ER$Relship, _Field$schema) == Relship.schema);
-  axiom (getFieldByName(ER$RelshipEnd, _Field$relship) == RelshipEnd.relship);
-	
-  axiom (getFieldByName(REL$RELAttribute, _Field$name) == RELAttribute.name);
-  axiom (getFieldByName(REL$RELAttribute, _Field$isKey) == RELAttribute.isKey);
-  axiom (getFieldByName(REL$RELAttribute, _Field$relation) == RELAttribute.relation);
-  axiom (getFieldByName(REL$Relation, _Field$schema) == Relation.schema);
-  axiom (getFieldByName(REL$Relation, _Field$name) == Relation.name);
+  axiom (FieldOfDecl(ER$ERSchema, _Field$name) == ERSchema.name);
+  axiom (FieldOfDecl(ER$ERSchema, _Field$entities) == ERSchema.entities);
+  axiom (FieldOfDecl(ER$ERSchema, _Field$relships) == ERSchema.relships);
+  axiom (FieldOfDecl(ER$Entity, _Field$name) == Entity.name);
+  axiom (FieldOfDecl(ER$Entity, _Field$schema) == Entity.schema);
+  axiom (FieldOfDecl(ER$ERAttribute, _Field$entity) == ERAttribute.entity);
+  axiom (FieldOfDecl(ER$ERAttribute, _Field$relship) == ERAttribute.relship);
+  axiom (FieldOfDecl(ER$ERAttribute, _Field$name) == ERAttribute.name);
+  axiom (FieldOfDecl(ER$ERAttribute, _Field$isKey) == ERAttribute.isKey);
+  axiom (FieldOfDecl(ER$RelshipEnd, _Field$entity) == RelshipEnd.entity);
+  axiom (FieldOfDecl(ER$Relship, _Field$name) == Relship.name);
+  axiom (FieldOfDecl(ER$Relship, _Field$schema) == Relship.schema);
+  axiom (FieldOfDecl(ER$RelshipEnd, _Field$relship) == RelshipEnd.relship);
+
+  axiom (FieldOfDecl(REL$RELSchema, _Field$name) == RELSchema.name);
+  axiom (FieldOfDecl(REL$RELSchema, _Field$relations) == RELSchema.relations);
+  axiom (FieldOfDecl(REL$RELAttribute, _Field$name) == RELAttribute.name);
+  axiom (FieldOfDecl(REL$RELAttribute, _Field$isKey) == RELAttribute.isKey);
+  axiom (FieldOfDecl(REL$RELAttribute, _Field$relation) == RELAttribute.relation);
+  axiom (FieldOfDecl(REL$Relation, _Field$schema) == Relation.schema);
+  axiom (FieldOfDecl(REL$Relation, _Field$name) == Relation.name);
 
   
 // [mmName, className]
-const classifierTable : [String, String] TName;
+const classifierTable : [String, String] ClassName;
   axiom classifierTable[_ER, _Entity] == ER$Entity;
   axiom classifierTable[_ER, _Relship] == ER$Relship;
   axiom classifierTable[_ER, _ERSchema] == ER$ERSchema;

@@ -7,6 +7,10 @@
 type String = Seq Char;
 type Char = int;
 
+
+
+
+
 function String#ToUpper(String): String;
   axiom (forall s: String :: { Seq#Length(String#ToUpper(s)) }
 	Seq#Length(String#ToUpper(s)) == Seq#Length(s));
@@ -48,8 +52,6 @@ function String#Substring(s: String, lower: int, upper: int): String;
   );
 
 
-function Math#Pow(int,int):int;
-  axiom (forall b:int, e:int :: Math#Pow(b,0)==1 && Math#Pow(b,e+1)==b*Math#Pow(b,e));
 
 
 function String#ToInteger(String, int, int): int;
@@ -828,8 +830,7 @@ procedure $IterHavoc1(this: ref, modi: Set BoxType, nw: Set BoxType);
               $o == this || modi[$Box($o)] || nw[$Box($o)]);
   ensures $HeapSucc(old($Heap), $Heap);
 
-procedure $IterCollectNewObjects(prevHeap: HeapType, newHeap: HeapType, this: ref, NW: Field (Set BoxType))
-                        returns (s: Set BoxType);
+procedure $IterCollectNewObjects(prevHeap: HeapType, newHeap: HeapType, this: ref, NW: Field (Set BoxType)) returns (s: Set BoxType);
   ensures (forall bx: BoxType :: { s[bx] } s[bx] <==>
               read(newHeap, this, NW)[bx] ||
               ($Unbox(bx) != null && !read(prevHeap, $Unbox(bx):ref, alloc) && read(newHeap, $Unbox(bx):ref, alloc)));

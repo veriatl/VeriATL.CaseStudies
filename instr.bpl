@@ -27,7 +27,7 @@ procedure OpCode#Pusht(stk: Seq BoxType) returns (newStk: Seq BoxType);
 procedure OpCode#Pop(stk: Seq BoxType) returns (newStk: Seq BoxType);
   ensures newStk == Seq#Take(stk, Seq#Length(stk)-1);
   
-//Instr: store, 123
+//Instr: store
 procedure OpCode#Store<T>(stk: Seq BoxType) returns(newStk: Seq BoxType, topVal: T);
   ensures newStk == Seq#Take(stk, Seq#Length(stk)-1);
   ensures topVal == $Unbox(Seq#Index(stk, Seq#Length(stk)-1));
@@ -55,46 +55,36 @@ procedure OpCode#DupX1(stk: Seq BoxType) returns (newStk: Seq BoxType);
 //Instr: New, 
 // locStk[len-1] == mmName
 // locStk[len-2] == className
-// with the following stmt in appropriate place:
-//  var obj;
-//
-//  havoc obj;
-//  assume !Heap[obj, alloc];
-procedure OpCode#New(stk: Seq BoxType, obj: ref) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 2;
-  requires !Heap[obj, alloc];
-  modifies Heap;
-  ensures Heap[obj, alloc];
-  ensures (forall<alpha> o: ref, f:Field alpha :: 
-	(old(Heap[o, f]) == Heap[o, f]) || 
-	(o == obj && f == alloc) 
-  );
-  ensures typeof(obj) == classifierTable[($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String), 
-										 ($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): String)];
-  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(obj));
+/*
+	assert Seq#Length(stk) >= 2;
+	havoc _placehold;
+    assume _placehold != null && !read($xHeap, _placehold, alloc) && dtype(_placehold) == 
+	classifierTable[($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String), 
+					($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): String)];
+	$xHeap := update($xHeap, _placehold, alloc, true);
+	assume $IsGoodHeap($xHeap);
+	stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(_placehold));
+*/
+
 
 // Instr: get  
-// E.g. when people have instr like 'get name'
-//	var name: String	-- This information is from metamodel.
-//	fieldType is then instansiate to 'String', so getFieldByName(TName, alpha) is instansiate to String, which return 'field String'.
-// So, we require the operands of get to have some of naming mechanism, e.g. FieldType#name. They should pre-precessed in type.bpl, by processing the metamodel.
-procedure OpCode#Get<alpha>(stk: Seq BoxType, fieldName: alpha) returns(newStk: Seq BoxType);  
-  requires Seq#Length(stk) >= 1;
-  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), 
-					$Box(Heap[ $Unbox(Seq#Index(stk, Seq#Length(stk)-1)), 
-								getFieldByName(typeof($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref), fieldName)]));
+/*
+	assert Seq#Length(stk) >= 1;
+	assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
+	stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box($xHeap[$Unbox(Seq#Index(stk, Seq#Length(stk)-1)), FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _placeholder): Field (_infered)]));
+*/
   
 
 //Instr: set  
-procedure OpCode#Set<alpha>(stk: Seq BoxType, fieldName: alpha, val: alpha) returns(newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 2;
-  modifies Heap;
-  ensures newStk == Seq#Take(stk, Seq#Length(stk)-2);
-  ensures Heap[($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): ref), getFieldByName(typeof($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): ref),fieldName)] == val;
-  ensures (forall<gama> o: ref, f:Field gama :: 
-	(old(Heap[o, f]) == Heap[o, f]) || 
-		(o == ($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): ref) && 
-		 f == getFieldByName(typeof($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): ref),fieldName))); 
+/*
+assert Seq#Length(stk) >= 2;
+assert $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) != null;
+$xHeap := update($xHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), 
+				FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _placeholder): Field (_infered), 
+				$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
+assume $IsGoodHeap($xHeap);
+stk := Seq#Take(stk, Seq#Length(stk)-2);
+*/
 
    
 // Instr: findme
