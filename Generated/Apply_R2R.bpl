@@ -141,7 +141,7 @@ function R2R_links(
 &&
 (forall i: int:: 0<=i &&i <Seq#Length(links) ==>			
 			Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t] != null &&
-			read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc)
+			read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc) && getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_s])) == Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t]
 		)
 
 }

@@ -129,7 +129,12 @@ function ASM#Resolve#Sem<alpha>(this: ref, heap: HeapType, elem: alpha) : BoxTyp
 	axiom (forall this:ref, heap: HeapType, elem: String ::
 		ASM#Resolve#Sem(this, heap, elem) == $Box(elem)
 	);
-	
+	axiom (forall this:ref, heap: HeapType, elem: bool ::
+		ASM#Resolve#Sem(this, heap, elem) == $Box(elem)
+	);	
+	axiom (forall this:ref, heap: HeapType, elem: int ::
+		ASM#Resolve#Sem(this, heap, elem) == $Box(elem)
+	);
 	
 function invisble#getLinkbySources(s: Set ref): ref;
   axiom (forall s1,s2 : Set ref :: !Set#Equal(s1,s2) ==> 
@@ -185,17 +190,7 @@ function NTransientLinkSet#getLinksByRule(h:HeapType, rule: String): Seq ref;
 	  (i+1<=j && j<Seq#Length(NTransientLinkSet#getLinksByRule(h,r)) ) ==>
 		Seq#Index(NTransientLinkSet#getLinksByRule(h, r),i) != Seq#Index(NTransientLinkSet#getLinksByRule(h, r),j)
   ));
-  // unique target elements
-  axiom (forall h:HeapType, r: String, i,j:int :: 
-    ( (0<=i && i<Seq#Length(NTransientLinkSet#getLinksByRule(h,r))) && 
-	  (i+1<=j && j<Seq#Length(NTransientLinkSet#getLinksByRule(h,r)) ) ==>
-		getTarsBySrcs(Seq#Singleton(Map#Elements(read(h, Seq#Index(NTransientLinkSet#getLinksByRule(h, r),i), TransientLink#source))[_s])) != getTarsBySrcs(Seq#Singleton(Map#Elements(read(h, Seq#Index(NTransientLinkSet#getLinksByRule(h, r),j), TransientLink#source))[_s]))
-  ));
-  // all links's src and target are paired
-  axiom (forall h:HeapType, r: String, i: int:: 0<=i &&i <Seq#Length(NTransientLinkSet#getLinksByRule(h,r)) ==>			
-			getTarsBySrcs(Seq#Singleton(Map#Elements(h[Seq#Index(NTransientLinkSet#getLinksByRule(h,r),i), TransientLink#source])[_s])) == 
-			Map#Elements(h[Seq#Index(NTransientLinkSet#getLinksByRule(h,r),i), TransientLink#target])[_t]
-		);
+  
 		
 //--------------------------------
 //-------- Helper Function -------
