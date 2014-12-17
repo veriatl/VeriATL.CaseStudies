@@ -1,7 +1,7 @@
 /*
 rule E2R { from s : ER!Entity 
 		   to t : REL!Relation ( name  <- s.name, schema <- s.schema, attrs <- s.attrs) }
-aaa
+
 */
 
 
