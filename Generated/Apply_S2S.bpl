@@ -161,8 +161,8 @@ var t: ref;	//slot: 3
 var s: ref;	//slot: 2
 var self: ref;	//slot: 0
 var link: ref;	//slot: 1
-var $resolved: ref;	//slot: 1
-var $newCol: ref;	//slot: 1
+var $resolved: ref;	
+var $newCol: ref;	
 
 
 

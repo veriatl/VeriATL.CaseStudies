@@ -62,6 +62,7 @@ const unique _Field$relship: NameFamily;
 const unique _Field$relation: NameFamily;
 const unique _Field$entity: NameFamily;
 const unique _Field$schema: NameFamily;
+const unique _Field$attrs: NameFamily;
 
 const unique _Field$entities: NameFamily;
 const unique _Field$relships: NameFamily;
@@ -149,6 +150,8 @@ const unique TransientLink#rule: Field String;
   axiom (FieldOfDecl(ER$Relship, _Field$name) == Relship.name);
   axiom (FieldOfDecl(ER$Relship, _Field$schema) == Relship.schema);
   axiom (FieldOfDecl(ER$RelshipEnd, _Field$relship) == RelshipEnd.relship);
+  axiom (FieldOfDecl(ER$Entity, _Field$attrs) == Entity.attrs);
+  axiom (FieldOfDecl(ER$Relship, _Field$attrs) == Relship.attrs);
 
   axiom (FieldOfDecl(REL$RELSchema, _Field$name) == RELSchema.name);
   axiom (FieldOfDecl(REL$RELSchema, _Field$relations) == RELSchema.relations);
@@ -157,6 +160,7 @@ const unique TransientLink#rule: Field String;
   axiom (FieldOfDecl(REL$RELAttribute, _Field$relation) == RELAttribute.relation);
   axiom (FieldOfDecl(REL$Relation, _Field$schema) == Relation.schema);
   axiom (FieldOfDecl(REL$Relation, _Field$name) == Relation.name);
+  axiom (FieldOfDecl(REL$Relation, _Field$attrs) == Relation.attrs);
 
   
 // [mmName, className]

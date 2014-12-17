@@ -20,6 +20,11 @@ function surj_tar_model($s: HeapType, $t: HeapType): bool
 forall $o: ref :: $o!=null && read($t, $o, alloc) && dtype($o) == REL$RELSchema ==>
 	(exists $i: ref :: dtype($i) == ER$ERSchema && $i != null && read($s, $i, alloc) && getTarsBySrcs(Seq#Singleton($i))==$o)
 )
+&&
+(
+forall $o: ref :: $o!=null && read($t, $o, alloc) && dtype($o) == REL$Relation ==>
+	(exists $i: ref :: (dtype($i) == ER$Entity || dtype($i)==ER$Relship) && $i != null && read($s, $i, alloc) && getTarsBySrcs(Seq#Singleton($i))==$o)
+)
 }
 
 

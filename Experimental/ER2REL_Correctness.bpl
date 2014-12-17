@@ -1,3 +1,11 @@
+/*
+we take two strategies to handle exists quantifier
+- rewrite exists :: f(a) -> ! (forall :: !f(a))
+- rewrite ATL rule, should not contain eopposite references
+
+*/
+
+
 function valid_src_model($h: HeapType): bool
 {
 (forall $i: ref ::
@@ -62,24 +70,13 @@ procedure driver()
 				 !read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, Entity.attrs), IndexField(i))), ERAttribute.isKey) 
 			));
   modifies $tarHeap,$linkHeap;
-    // unique schema names
-  ensures (forall $o1, $o2: ref :: $o1!=$o2 && $o1!=null && read($tarHeap, $o1, alloc) && dtype($o1) == REL$RELSchema
-				&& $o2!=null && read($tarHeap, $o2, alloc) && dtype($o2) == REL$RELSchema ==>
-				read($tarHeap, $o1, RELSchema.name) != read($tarHeap, $o2, RELSchema.name));  
-	// relation names are unique in schema
-  ensures (forall $o: ref :: {read($tarHeap, $o, alloc)} $o!=null && read($tarHeap, $o, alloc) && dtype($o) == REL$RELSchema ==> 
-			( forall j1,j2: int :: {$Unbox(read($tarHeap, read($tarHeap, $o, RELSchema.relations), IndexField(j1))): ref, $Unbox(read($tarHeap, read($tarHeap, $o, RELSchema.relations), IndexField(j2))): ref} 
-			   0<=j1 && j1<j2 && j2<_System.array.Length(read($tarHeap, $o, RELSchema.relations))  ==>
-				$Unbox(read($tarHeap, read($tarHeap, $o, RELSchema.relations), IndexField(j1))): ref != $Unbox(read($tarHeap, read($tarHeap, $o, RELSchema.relations), IndexField(j2))): ref ==>
-					read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, $o, RELSchema.relations), IndexField(j1))), Relation.name) != read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, $o, RELSchema.relations), IndexField(j2))), Relation.name)	
-			));	
-	// attribute names unique in relation, should not hold!
-  ensures (forall $o: ref :: {read($tarHeap, $o, alloc)} $o!=null && read($tarHeap, $o, alloc) && dtype($o) == REL$Relation ==> 
-			( forall j1,j2: int :: {$Unbox(read($tarHeap, read($tarHeap, $o, Relation.attrs), IndexField(j1))): ref, $Unbox(read($tarHeap, read($tarHeap, $o, Relation.attrs), IndexField(j2))): ref} 
-			   0<=j1 && j1<j2 && j2<_System.array.Length(read($tarHeap, $o, Relation.attrs))  ==>
-				$Unbox(read($tarHeap, read($tarHeap, $o, Relation.attrs), IndexField(j1))): ref != $Unbox(read($tarHeap, read($tarHeap, $o, Relation.attrs), IndexField(j2))): ref ==>
-					read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, $o, Relation.attrs), IndexField(j1))), RELAttribute.name) != read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, $o, Relation.attrs), IndexField(j2))), RELAttribute.name)	
-			));	
+  // relations have a key
+  ensures   (forall r: ref :: r!=null && read($tarHeap, r, alloc) && dtype(r) == REL$Relation ==> 
+				dtype(Seq#Index(getTarsBySrcs_inverse(r),0)) == ER$Entity ==> // trouble some
+			!( forall i: int :: 0<=i && i<_System.array.Length(read($tarHeap, r, Relation.attrs))  ==>
+				 !read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, r, Relation.attrs), IndexField(i))), RELAttribute.isKey) 
+			)
+  );
 {
 	
 	var hp: HeapType  where $IsGoodHeap(hp);
@@ -101,31 +98,26 @@ procedure driver()
 
 	call S2S_applys();
 	call E2R_applys();
+
 	call R2R_applys();
 	call EA2A_applys();
 	call RA2A_applys();
 	call RA2AK_applys();
-	
-	
-// helper: to better explain the layout of RELSchema.relations
-assert (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$ERSchema ==> 
-			( forall j: int :: _System.array.Length(read($srcHeap, r, ERSchema.entities))<=j && j<_System.array.Length(read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), RELSchema.relations))  ==>
-				read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), RELSchema.relations), IndexField(j))), Relation.name) == read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.relships), IndexField(j-_System.array.Length(read($srcHeap, r, ERSchema.entities))))), Relship.name)
-			));	
+
+
+		
+
+// helper: rewrite the outcome of EA2A
+assume (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Entity ==> 
+			( forall j: int :: 0<=j && j<_System.array.Length(read($srcHeap, r, Entity.attrs))  ==>
+				read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.attrs), IndexField(j))):ref, RELAttribute.isKey) 
+				<==> 
+				read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, Entity.attrs), IndexField(j))), ERAttribute.isKey)
+			));	 
 			
 
 
-/*
-// sanity check, redundant
-assert (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$ERSchema ==> 
-			( forall j: int :: 0<=j && j<_System.array.Length(read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), RELSchema.relations))  ==>
-				read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), RELSchema.relations), IndexField(j))), Relation.name) == read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.entities), IndexField(j))), Entity.name)
-			));	
-assert (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$ERSchema ==> 
-			( forall j: int :: 0<=j && j<_System.array.Length(read($srcHeap, r, ERSchema.relships))  ==>
-				read($tarHeap, $Unbox(read($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), RELSchema.relations), IndexField(j+_System.array.Length(read($srcHeap, r, ERSchema.entities))))), Relation.name) == read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.relships), IndexField(j))), Relship.name)
-			));	
-*/
+
 
 	
 }
@@ -292,12 +284,32 @@ modifies $tarHeap;
 // t.name <- s.name
 ensures (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Entity ==> 
 		read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.name) == read($srcHeap, r, Entity.name));
+// dtype(t.attrs) = class._System.array
+ensures (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Entity ==> 
+	dtype(read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.attrs)) == class._System.array
+);
+// t.attrs != null && t.attrs.alloc
+ensures (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Entity ==> 
+	read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.attrs) != null 
+ && read($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.attrs), alloc)
+);
+// length(t.attrs) = length(s.attrs)
+ensures (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Entity ==> 
+		_System.array.Length(read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.attrs)) 
+	 == _System.array.Length(read($srcHeap, r, Entity.attrs))
+);
+// t.attrs[j] == s.attrs[j]
+ensures (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Entity ==> 
+			( forall j: int :: 0<=j && j<_System.array.Length(read($srcHeap, r, Entity.attrs))  ==>
+				$Unbox(read($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.attrs), IndexField(j))): ref ==
+				getTarsBySrcs(Seq#Singleton( $Unbox(read($srcHeap, read($srcHeap, r, Entity.attrs), IndexField(j))): ref) )
+			));
 // frame property
 ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
-		((dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$Entity && $f == Relation.name) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
+		((dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$Entity && ($f == Relation.name || $f == Relation.attrs)) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
-free ensures surj_tar_model($srcHeap, $tarHeap);
+ensures surj_tar_model($srcHeap, $tarHeap);
 
 procedure R2R_applys();
 requires (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Relship ==>
@@ -315,13 +327,14 @@ ensures (forall<alpha> $o: ref, $f: Field alpha ::
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 free ensures surj_tar_model($srcHeap, $tarHeap);
 
+
 procedure EA2A_applys();
 requires (forall att,ent: ref :: 
 	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
  && ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
 		read($srcHeap, att, ERAttribute.entity) == ent ==>
 		read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)), alloc) 
-	 && getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)) != null );
+	 && getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)) != null ); 
 modifies $tarHeap;
 ensures (forall att,ent: ref :: 
 	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
@@ -333,17 +346,12 @@ ensures (forall att,ent: ref ::
  && ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
 		read($srcHeap, att, ERAttribute.entity) == ent ==>
 		read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)), RELAttribute.isKey) == read($srcHeap, att, ERAttribute.isKey));
-ensures (forall att,ent: ref :: 
-	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
- && ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
-		read($srcHeap, att, ERAttribute.entity) == ent ==>
-		read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)), RELAttribute.relation) == getTarsBySrcs(Seq#Singleton(ent)));
 ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
 		(  dtype($o) == REL$RELAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Entity 
-		&& ($f == RELAttribute.name || $f == RELAttribute.isKey || $f == RELAttribute.relation)) 
+		&& ($f == RELAttribute.name || $f == RELAttribute.isKey)) 
 	 || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 ensures surj_tar_model($srcHeap, $tarHeap);

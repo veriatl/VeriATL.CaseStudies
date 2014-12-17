@@ -1,23 +1,23 @@
 /*
-rule S2S { 
-  from s : ER!ERSchema to t : REL!RELSchema ( name  <- s.name, relations <-s.entities, relations <-s.relships)}
+rule E2R { from s : ER!Entity 
+		   to t : REL!Relation ( name  <- s.name ) }
 */
 
 
 
-procedure S2S_match();
-requires (forall $i: ref :: $i!=null && read($srcHeap, $i, alloc) && dtype($i) == ER$ERSchema ==> 
+procedure E2R_match();
+requires (forall $i: ref :: $i!=null && read($srcHeap, $i, alloc) && dtype($i) == ER$Entity ==> 
 		getTarsBySrcs(Seq#Singleton($i))==null || !read($tarHeap, getTarsBySrcs(Seq#Singleton($i)), alloc));
 modifies $tarHeap,$linkHeap;
-ensures (forall $i: ref :: $i!=null && read($srcHeap, $i, alloc) && dtype($i) == ER$ERSchema ==> 
+ensures (forall $i: ref :: $i!=null && read($srcHeap, $i, alloc) && dtype($i) == ER$Entity ==> 
 		getTarsBySrcs(Seq#Singleton($i))!=null && read($tarHeap, getTarsBySrcs(Seq#Singleton($i)), alloc));
 ensures (forall<alpha> $o : ref, $f: Field alpha ::
-	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$RELSchema && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERSchema && $f==alloc)));
+	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$Entity && $f==alloc)));
 free ensures $HeapSucc(old($tarHeap), $tarHeap);
 free ensures $HeapSucc(old($linkHeap), $linkHeap);
 free ensures surj_tar_model($srcHeap, $tarHeap);
 
-implementation S2S_match () returns ()
+implementation E2R_match () returns ()
 {
 
 var stk: Seq BoxType;
@@ -27,19 +27,21 @@ var self: ref;	//slot: 0
 var obj#4: Seq ref;
 var obj#11: ref;
 var obj#23: ref;
-
+var set : Set ref;
 
 stk := OpCode#Aux#InitStk();
+set := Set#Empty();
 
-
-call stk := OpCode#Push(stk, _ERSchema);
+call stk := OpCode#Push(stk, _Entity);
 call stk := OpCode#Push(stk, _ER);
 call stk := OpCode#Findme(stk);
 call stk := OpCode#Push(stk, _IN);
 call stk, obj#4 := LIB#AllInstanceFrom(stk, $srcHeap);
 
+// test contaiment of allinstance function
+assert (forall i: ref :: i!=null && read($srcHeap, i, alloc) && dtype(i) == ER$Entity ==> Seq#Contains(obj#4,i)); 
 
-assert (forall i: ref :: i!=null && read($srcHeap, i, alloc) && dtype(i) == ER$ERSchema ==> Seq#Contains(obj#4,i)); // test contaiment of allinstance function
+
 
 
 
@@ -51,12 +53,12 @@ while($i<Seq#Length(obj#4))
   invariant (forall i: int:: 0<=i &&i <$i ==>
 			true ==>
 			(
-				Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$ERSchema ==> 
+				Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$Entity ==> 
 					getTarsBySrcs(Seq#Singleton(Seq#Index(obj#4,i)))!=null && read($tarHeap, getTarsBySrcs(Seq#Singleton(Seq#Index(obj#4,i))), alloc)
 			)
 		);
   invariant (forall<alpha> $o : ref, $f: Field alpha ::
-	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$RELSchema && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERSchema && $f==alloc)));
+	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$Entity && $f==alloc)));
   free invariant $HeapSucc(old($tarHeap), $tarHeap);
   free invariant $HeapSucc(old($linkHeap), $linkHeap);
 { 
@@ -91,7 +93,7 @@ while($i<Seq#Length(obj#4))
 	stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(obj#11));
 
 	call stk := OpCode#Dup(stk);
-	call stk := OpCode#Push(stk, _S2S);
+	call stk := OpCode#Push(stk, _R2R);
 	
 	call stk := NTransientLink#setRule
 	(stk, 
@@ -110,7 +112,7 @@ while($i<Seq#Length(obj#4))
 
 	call stk := OpCode#Dup(stk);
 	call stk := OpCode#Push(stk, _t);
-	call stk := OpCode#Push(stk, _RELSchema);
+	call stk := OpCode#Push(stk, _Relation);
 	call stk := OpCode#Push(stk, _REL);
 	
 	assert Seq#Length(stk) >= 2;
@@ -133,7 +135,7 @@ while($i<Seq#Length(obj#4))
 	 $Unbox(Seq#Index(stk, Seq#Length(stk)-2)),
 	 $Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
 	
-	assert $linkHeap[obj#11, TransientLink#rule] == _S2S;
+	assert $linkHeap[obj#11, TransientLink#rule] == _R2R;
 	assert Map#Elements($linkHeap[obj#11, TransientLink#target])[_t] == obj#23;
 	assert Map#Elements($linkHeap[obj#11, TransientLink#source])[_s] == s;
 	
@@ -149,6 +151,3 @@ while($i<Seq#Length(obj#4))
 	
 }
 }
-
-
-
