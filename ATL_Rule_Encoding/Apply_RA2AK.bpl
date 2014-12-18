@@ -6,32 +6,11 @@ rule RA2AK { from att : ER!ERAttribute, rse : ER!RelshipEnd
 
 */
 
-function RA2AK_links(
-	$srcHeap:HeapType,
-	$linkHeap:HeapType,
-	$tarHeap:HeapType,
-	links: Seq ref):bool
-{
-(forall att,rse: ref :: 
-	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
- && rse!=null && read($srcHeap, rse, alloc) && dtype(rse) == ER$RelshipEnd ==> 
-		read($srcHeap, att, ERAttribute.entity) == read($srcHeap,rse, RelshipEnd.entity) && read($srcHeap,att,ERAttribute.isKey) ==>
-			(exists l:ref :: l!=null &&
-				Seq#Contains(links,l) && Map#Elements(read($linkHeap, l, TransientLink#source))[_att] == att  && Map#Elements(read($linkHeap, l, TransientLink#source))[_rse] == rse ))
-&&
-(forall i: int:: 0<=i &&i <Seq#Length(links) ==>			
-			Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t] != null 
-		 && read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc)
-		 && getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_rse])) == Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t]
-		)
-}
 
 
 
-procedure RA2AK_applys(links: Seq ref)
-requires $IsGoodHeap($tarHeap);
-requires links == NTransientLinkSet#getLinksByRule($linkHeap, _RA2AK);
-requires RA2AK_links($srcHeap,$linkHeap,$tarHeap,links);
+
+procedure RA2AK_applys();
 requires surj_tar_model($srcHeap, $tarHeap);
 requires (forall att,rse: ref :: 
 	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
@@ -39,7 +18,7 @@ requires (forall att,rse: ref ::
 		read($srcHeap, att, ERAttribute.entity) == read($srcHeap,rse, RelshipEnd.entity) && read($srcHeap,att,ERAttribute.isKey) ==>
 		read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),rse)), alloc) 
 	 && getTarsBySrcs(Seq#Build(Seq#Singleton(att),rse)) != null 
-	 && dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(att),rse))) == REL$Relation	); // troublesome
+	 && dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(att),rse))) == REL$RELAttribute	); 
 modifies $tarHeap;
 ensures (forall att,rse: ref :: 
 	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
@@ -65,12 +44,18 @@ ensures (forall<alpha> $o: ref, $f: Field alpha ::
 	 || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 ensures surj_tar_model($srcHeap, $tarHeap);
+
+implementation RA2AK_applys()
 {
 
 	var $i : int;
 	var link : ref;
-
+	var links: Seq ref;
 	
+
+	links := NTransientLinkSet#getLinksByRule($linkHeap, _RA2AK);
+	assume RA2AK_links($srcHeap,$linkHeap,$tarHeap,links);
+
 	$i:=0;
 
 		
@@ -240,4 +225,24 @@ stk := Seq#Take(stk, Seq#Length(stk)-2);
 
 call stk := OpCode#Pop(stk);
 
+}
+
+function RA2AK_links(
+	$srcHeap:HeapType,
+	$linkHeap:HeapType,
+	$tarHeap:HeapType,
+	links: Seq ref):bool
+{
+(forall att,rse: ref :: 
+	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
+ && rse!=null && read($srcHeap, rse, alloc) && dtype(rse) == ER$RelshipEnd ==> 
+		read($srcHeap, att, ERAttribute.entity) == read($srcHeap,rse, RelshipEnd.entity) && read($srcHeap,att,ERAttribute.isKey) ==>
+			(exists l:ref :: l!=null &&
+				Seq#Contains(links,l) && Map#Elements(read($linkHeap, l, TransientLink#source))[_att] == att  && Map#Elements(read($linkHeap, l, TransientLink#source))[_rse] == rse ))
+&&
+(forall i: int:: 0<=i &&i <Seq#Length(links) ==>			
+			Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t] != null 
+		 && read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc)
+		 && getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_rse])) == Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t]
+		)
 }

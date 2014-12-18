@@ -6,10 +6,7 @@ rule S2S {
 
 
 
-procedure S2S_applys(links: Seq ref)
-requires $IsGoodHeap($tarHeap);
-requires links == NTransientLinkSet#getLinksByRule($linkHeap, _S2S);
-requires S2S_links($srcHeap,$linkHeap,$tarHeap,links);
+procedure S2S_applys();
 requires surj_tar_model($srcHeap, $tarHeap);
 requires (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$ERSchema ==>
 		read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), alloc) 
@@ -51,11 +48,17 @@ ensures (forall<alpha> $o: ref, $f: Field alpha ::
 		( (dtype($o) == REL$RELSchema && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERSchema && ($f == RELSchema.name || $f == RELSchema.relations)) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 ensures surj_tar_model($srcHeap, $tarHeap);
+
+implementation S2S_applys()
 {
 
 	var $i : int;
 	var link : ref;
+	var links: Seq ref;
+	
 
+	links := NTransientLinkSet#getLinksByRule($linkHeap, _S2S);
+	assume S2S_links($srcHeap,$linkHeap,$tarHeap,links);
 	
 	$i:=0;
 

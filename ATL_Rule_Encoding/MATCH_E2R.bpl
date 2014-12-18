@@ -6,11 +6,14 @@ rule E2R { from s : ER!Entity
 
 
 procedure E2R_match();
-requires (forall $i: ref :: $i!=null && read($srcHeap, $i, alloc) && dtype($i) == ER$Entity ==> 
-		getTarsBySrcs(Seq#Singleton($i))==null || !read($tarHeap, getTarsBySrcs(Seq#Singleton($i)), alloc));
+requires (forall s: ref :: s!=null && read($srcHeap, s, alloc) && dtype(s) == ER$Entity ==> 
+		getTarsBySrcs(Seq#Singleton(s))==null || !read($tarHeap, getTarsBySrcs(Seq#Singleton(s)), alloc));
 modifies $tarHeap,$linkHeap;
-ensures (forall $i: ref :: $i!=null && read($srcHeap, $i, alloc) && dtype($i) == ER$Entity ==> 
-		getTarsBySrcs(Seq#Singleton($i))!=null && read($tarHeap, getTarsBySrcs(Seq#Singleton($i)), alloc));
+ensures (forall s: ref :: s!=null && read($srcHeap, s, alloc) && dtype(s) == ER$Entity ==> 
+		getTarsBySrcs(Seq#Singleton(s))!=null 
+		&& read($tarHeap, getTarsBySrcs(Seq#Singleton(s)), alloc)
+		&& dtype(getTarsBySrcs(Seq#Singleton(s))) == REL$Relation
+		);
 ensures (forall<alpha> $o : ref, $f: Field alpha ::
 	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$Entity && $f==alloc)));
 free ensures $HeapSucc(old($tarHeap), $tarHeap);
@@ -54,7 +57,9 @@ while($i<Seq#Length(obj#4))
 			true ==>
 			(
 				Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$Entity ==> 
-					getTarsBySrcs(Seq#Singleton(Seq#Index(obj#4,i)))!=null && read($tarHeap, getTarsBySrcs(Seq#Singleton(Seq#Index(obj#4,i))), alloc)
+					getTarsBySrcs(Seq#Singleton(Seq#Index(obj#4,i)))!=null 
+					&& read($tarHeap, getTarsBySrcs(Seq#Singleton(Seq#Index(obj#4,i))), alloc)
+					&& dtype(getTarsBySrcs(Seq#Singleton(Seq#Index(obj#4,i)))) == REL$Relation
 			)
 		);
   invariant (forall<alpha> $o : ref, $f: Field alpha ::

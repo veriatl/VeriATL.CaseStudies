@@ -3,26 +3,7 @@ rule EA2A { from att : ER!ERAttribute, ent : ER!Entity (att.entity = ent)
 	        to t : REL!RELAttribute 
 				  ( name <- att.name, isKey <- att.isKey, relation <- ent ) }
 */
-// properties of each link of e2r rule
-function EA2A_links(
-	$srcHeap:HeapType,
-	$linkHeap:HeapType,
-	$tarHeap:HeapType,
-	links: Seq ref):bool
-{
-(forall att,ent: ref :: 
-	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
- && ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
-		read($srcHeap, att, ERAttribute.entity) == ent ==>
-			(exists l:ref :: l!=null &&
-				Seq#Contains(links,l) && Map#Elements(read($linkHeap, l, TransientLink#source))[_att] == att  && Map#Elements(read($linkHeap, l, TransientLink#source))[_ent] == ent ))
-&&
-(forall i: int:: 0<=i &&i <Seq#Length(links) ==>			
-			Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t] != null 
-		 && read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc)
-		 && getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_ent])) == Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t]
-		)
-}
+
 
 
 
@@ -49,12 +30,17 @@ ensures (forall att,ent: ref ::
  && ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
 		read($srcHeap, att, ERAttribute.entity) == ent ==>
 		read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)), RELAttribute.isKey) == read($srcHeap, att, ERAttribute.isKey));
+ensures (forall att,ent: ref :: 
+	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
+ && ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
+		read($srcHeap, att, ERAttribute.entity) == ent ==>
+		read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)), RELAttribute.relation) == getTarsBySrcs(Seq#Singleton(ent)));
 ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
 		(  dtype($o) == REL$RELAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Entity 
-		&& ($f == RELAttribute.name || $f == RELAttribute.isKey)) 
+		&& ($f == RELAttribute.name || $f == RELAttribute.isKey || $f == RELAttribute.relation)) 
 	 || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 ensures surj_tar_model($srcHeap, $tarHeap);
@@ -77,12 +63,15 @@ ensures surj_tar_model($srcHeap, $tarHeap);
 		invariant (forall i: int:: 0<=i &&i <$i ==>			
 			read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_ent])), RELAttribute.isKey) == $srcHeap[Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att], ERAttribute.isKey]
 		);
+		invariant (forall i: int:: 0<=i &&i <$i ==>			
+			read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_ent])), RELAttribute.relation) == getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_ent]))
+		);
 		invariant (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
 		(  dtype($o) == REL$RELAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Entity 
-		&& ($f == RELAttribute.name || $f == RELAttribute.isKey)) 
+		&& ($f == RELAttribute.name || $f == RELAttribute.isKey || $f == RELAttribute.relation)) 
 	 || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
 		
 	{
@@ -114,12 +103,13 @@ procedure EA2A_apply (in: ref) returns ()
   modifies $tarHeap;
   ensures read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_att]), Map#Elements($linkHeap[in, TransientLink#source])[_ent])), RELAttribute.name) == read($srcHeap,Map#Elements($linkHeap[in, TransientLink#source])[_att],ERAttribute.name);
   ensures read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_att]), Map#Elements($linkHeap[in, TransientLink#source])[_ent])), RELAttribute.isKey) == read($srcHeap,Map#Elements($linkHeap[in, TransientLink#source])[_att],ERAttribute.isKey);
+  ensures read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_att]), Map#Elements($linkHeap[in, TransientLink#source])[_ent])), RELAttribute.relation) == getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_ent]));
   ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
 		(  dtype($o) == REL$RELAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute 
 		&& dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Entity 
-		&& ($f == RELAttribute.name || $f == RELAttribute.isKey )) 
+		&& ($f == RELAttribute.name || $f == RELAttribute.isKey || $f == RELAttribute.relation)) 
 	 || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
   ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) && $o != getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_att]), Map#Elements($linkHeap[in, TransientLink#source])[_ent])) ==> 
@@ -209,6 +199,24 @@ stk := Seq#Take(stk, Seq#Length(stk)-2);
 
 
 
+call stk := OpCode#Dup(stk);
+call stk := OpCode#GetASM(stk);
+call stk := OpCode#Load(stk, ent);
+
+call stk := ASM#Resolve(stk, $srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref);
+assume $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref == getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_ent]));
+
+
+// set
+assert Seq#Length(stk) >= 2;
+assert $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) != null;
+$tarHeap := update($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), 
+				FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _Field$relation): Field (ref), 
+				$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
+assume $IsGoodHeap($tarHeap);
+stk := Seq#Take(stk, Seq#Length(stk)-2);
+
+
 
 
 call stk := OpCode#Pop(stk);
@@ -216,3 +224,23 @@ call stk := OpCode#Pop(stk);
 
 }
 
+// properties of each link of e2r rule
+function EA2A_links(
+	$srcHeap:HeapType,
+	$linkHeap:HeapType,
+	$tarHeap:HeapType,
+	links: Seq ref):bool
+{
+(forall att,ent: ref :: 
+	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
+ && ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
+		read($srcHeap, att, ERAttribute.entity) == ent ==>
+			(exists l:ref :: l!=null &&
+				Seq#Contains(links,l) && Map#Elements(read($linkHeap, l, TransientLink#source))[_att] == att  && Map#Elements(read($linkHeap, l, TransientLink#source))[_ent] == ent ))
+&&
+(forall i: int:: 0<=i &&i <Seq#Length(links) ==>			
+			Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t] != null 
+		 && read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc)
+		 && getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_ent])) == Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t]
+		)
+}

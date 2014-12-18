@@ -89,7 +89,16 @@ __matcher__
 3:	pcall A.__matchE2R():V 
 4:	getasm 
 5:	pcall A.__matchR2R():V 
+6:	getasm 
+7:	pcall A.__matchEA2A():V 
+8:	getasm 
+9:	pcall A.__matchRA2A():V 
+10:	getasm 
+11:	pcall A.__matchRA2AK():V 
 __exec__
+	var: e:1
+	var: e:1
+	var: e:1
 	var: e:1
 	var: e:1
 	var: e:1
@@ -126,6 +135,36 @@ __exec__
 27:	load 1 
 28:	pcall A.__applyR2R(NTransientLink;):V 
 29:	enditerate 
+30:	getasm 
+31:	get links 
+32:	push EA2A 
+33:	call NTransientLinkSet;.getLinksByRule(S):QNTransientLink; 
+34:	iterate 
+35:	store 1 
+36:	getasm 
+37:	load 1 
+38:	pcall A.__applyEA2A(NTransientLink;):V 
+39:	enditerate 
+40:	getasm 
+41:	get links 
+42:	push RA2A 
+43:	call NTransientLinkSet;.getLinksByRule(S):QNTransientLink; 
+44:	iterate 
+45:	store 1 
+46:	getasm 
+47:	load 1 
+48:	pcall A.__applyRA2A(NTransientLink;):V 
+49:	enditerate 
+50:	getasm 
+51:	get links 
+52:	push RA2AK 
+53:	call NTransientLinkSet;.getLinksByRule(S):QNTransientLink; 
+54:	iterate 
+55:	store 1 
+56:	getasm 
+57:	load 1 
+58:	pcall A.__applyRA2AK(NTransientLink;):V 
+59:	enditerate 
 __matchS2S
 	var: s:1
 	var: self:0
@@ -251,7 +290,13 @@ __applyE2R
 12:	get name 
 13:	call A.__resolve__(J):J 
 14:	set name 
-15:	pop 
+15:	dup 
+16:	getasm 
+17:	load 2 
+18:	get attrs 
+19:	call A.__resolve__(J):J 
+20:	set attrs 
+21:	pop 
 __matchR2R
 	var: s:1
 	var: self:0
@@ -309,3 +354,281 @@ __applyR2R
 13:	call A.__resolve__(J):J 
 14:	set name 
 15:	pop 
+__matchEA2A
+	var: att:1
+	var: ent:2
+	var: self:0
+
+
+0:	push ERAttribute 
+1:	push ER 
+2:	findme 
+3:	push IN 
+4:	call MMOF!Classifier;.allInstancesFrom(S):QJ 
+5:	iterate 
+6:	store 1 
+7:	push Entity 
+8:	push ER 
+9:	findme 
+10:	push IN 
+11:	call MMOF!Classifier;.allInstancesFrom(S):QJ 
+12:	iterate 
+13:	store 2 
+14:	load 1 
+15:	get entity 
+16:	load 2 
+17:	call J.=(J):J 
+18:	call B.not():B 
+19:	if 44 
+20:	getasm 
+21:	get links 
+22:	push TransientLink 
+23:	push #native 
+24:	new 
+25:	dup 
+26:	push EA2A 
+27:	pcall NTransientLink;.setRule(MATL!Rule;):V 
+28:	dup 
+29:	push att 
+30:	load 1 
+31:	pcall NTransientLink;.addSourceElement(SJ):V 
+32:	dup 
+33:	push ent 
+34:	load 2 
+35:	pcall NTransientLink;.addSourceElement(SJ):V 
+36:	dup 
+37:	push t 
+38:	push RELAttribute 
+39:	push REL 
+40:	new 
+41:	pcall NTransientLink;.addTargetElement(SJ):V 
+42:	pusht 
+43:	pcall NTransientLinkSet;.addLink2(NTransientLink;B):V 
+44:	enditerate 
+45:	enditerate 
+__applyEA2A
+	var: t:4
+	var: att:2
+	var: ent:3
+	var: self:0
+	var: link:1
+
+	param: 1:NTransientLink;
+
+0:	load 1 
+1:	push att 
+2:	call NTransientLink;.getSourceElement(S):J 
+3:	store 2 
+4:	load 1 
+5:	push ent 
+6:	call NTransientLink;.getSourceElement(S):J 
+7:	store 3 
+8:	load 1 
+9:	push t 
+10:	call NTransientLink;.getTargetElement(S):J 
+11:	store 4 
+12:	load 4 
+13:	dup 
+14:	getasm 
+15:	load 2 
+16:	get name 
+17:	call A.__resolve__(J):J 
+18:	set name 
+19:	dup 
+20:	getasm 
+21:	load 2 
+22:	get isKey 
+23:	call A.__resolve__(J):J 
+24:	set isKey 
+25:	pop 
+__matchRA2A
+	var: att:1
+	var: rs:2
+	var: self:0
+
+
+0:	push ERAttribute 
+1:	push ER 
+2:	findme 
+3:	push IN 
+4:	call MMOF!Classifier;.allInstancesFrom(S):QJ 
+5:	iterate 
+6:	store 1 
+7:	push Relship 
+8:	push ER 
+9:	findme 
+10:	push IN 
+11:	call MMOF!Classifier;.allInstancesFrom(S):QJ 
+12:	iterate 
+13:	store 2 
+14:	load 1 
+15:	get relship 
+16:	load 2 
+17:	call J.=(J):J 
+18:	call B.not():B 
+19:	if 44 
+20:	getasm 
+21:	get links 
+22:	push TransientLink 
+23:	push #native 
+24:	new 
+25:	dup 
+26:	push RA2A 
+27:	pcall NTransientLink;.setRule(MATL!Rule;):V 
+28:	dup 
+29:	push att 
+30:	load 1 
+31:	pcall NTransientLink;.addSourceElement(SJ):V 
+32:	dup 
+33:	push rs 
+34:	load 2 
+35:	pcall NTransientLink;.addSourceElement(SJ):V 
+36:	dup 
+37:	push t 
+38:	push RELAttribute 
+39:	push REL 
+40:	new 
+41:	pcall NTransientLink;.addTargetElement(SJ):V 
+42:	pusht 
+43:	pcall NTransientLinkSet;.addLink2(NTransientLink;B):V 
+44:	enditerate 
+45:	enditerate 
+__applyRA2A
+	var: t:4
+	var: att:2
+	var: rs:3
+	var: self:0
+	var: link:1
+
+	param: 1:NTransientLink;
+
+0:	load 1 
+1:	push att 
+2:	call NTransientLink;.getSourceElement(S):J 
+3:	store 2 
+4:	load 1 
+5:	push rs 
+6:	call NTransientLink;.getSourceElement(S):J 
+7:	store 3 
+8:	load 1 
+9:	push t 
+10:	call NTransientLink;.getTargetElement(S):J 
+11:	store 4 
+12:	load 4 
+13:	dup 
+14:	getasm 
+15:	load 2 
+16:	get name 
+17:	call A.__resolve__(J):J 
+18:	set name 
+19:	dup 
+20:	getasm 
+21:	load 2 
+22:	get isKey 
+23:	call A.__resolve__(J):J 
+24:	set isKey 
+25:	dup 
+26:	getasm 
+27:	load 3 
+28:	call A.__resolve__(J):J 
+29:	set relation 
+30:	pop 
+__matchRA2AK
+	var: att:1
+	var: rse:2
+	var: self:0
+
+
+0:	push ERAttribute 
+1:	push ER 
+2:	findme 
+3:	push IN 
+4:	call MMOF!Classifier;.allInstancesFrom(S):QJ 
+5:	iterate 
+6:	store 1 
+7:	push RelshipEnd 
+8:	push ER 
+9:	findme 
+10:	push IN 
+11:	call MMOF!Classifier;.allInstancesFrom(S):QJ 
+12:	iterate 
+13:	store 2 
+14:	load 1 
+15:	get entity 
+16:	load 2 
+17:	get entity 
+18:	call J.=(J):J 
+19:	load 1 
+20:	get isKey 
+21:	pusht 
+22:	call J.=(J):J 
+23:	call J.and(J):J 
+24:	call B.not():B 
+25:	if 50 
+26:	getasm 
+27:	get links 
+28:	push TransientLink 
+29:	push #native 
+30:	new 
+31:	dup 
+32:	push RA2AK 
+33:	pcall NTransientLink;.setRule(MATL!Rule;):V 
+34:	dup 
+35:	push att 
+36:	load 1 
+37:	pcall NTransientLink;.addSourceElement(SJ):V 
+38:	dup 
+39:	push rse 
+40:	load 2 
+41:	pcall NTransientLink;.addSourceElement(SJ):V 
+42:	dup 
+43:	push t 
+44:	push RELAttribute 
+45:	push REL 
+46:	new 
+47:	pcall NTransientLink;.addTargetElement(SJ):V 
+48:	pusht 
+49:	pcall NTransientLinkSet;.addLink2(NTransientLink;B):V 
+50:	enditerate 
+51:	enditerate 
+__applyRA2AK
+	var: t:4
+	var: att:2
+	var: rse:3
+	var: self:0
+	var: link:1
+
+	param: 1:NTransientLink;
+
+0:	load 1 
+1:	push att 
+2:	call NTransientLink;.getSourceElement(S):J 
+3:	store 2 
+4:	load 1 
+5:	push rse 
+6:	call NTransientLink;.getSourceElement(S):J 
+7:	store 3 
+8:	load 1 
+9:	push t 
+10:	call NTransientLink;.getTargetElement(S):J 
+11:	store 4 
+12:	load 4 
+13:	dup 
+14:	getasm 
+15:	load 2 
+16:	get name 
+17:	call A.__resolve__(J):J 
+18:	set name 
+19:	dup 
+20:	getasm 
+21:	load 2 
+22:	get isKey 
+23:	call A.__resolve__(J):J 
+24:	set isKey 
+25:	dup 
+26:	getasm 
+27:	load 3 
+28:	get relship 
+29:	call A.__resolve__(J):J 
+30:	set relation 
+31:	pop 

@@ -4,33 +4,11 @@ rule RA2A { from att : ER!ERAttribute, rs  : ER!Relship ( att.relship = rs )
 			       ( name <- att.name, isKey <- att.isKey, relation <- rs ) }
 
 */
-// properties of each link of e2r rule
-function RA2A_links(
-	$srcHeap:HeapType,
-	$linkHeap:HeapType,
-	$tarHeap:HeapType,
-	links: Seq ref):bool
-{
-(forall att,rs: ref :: 
-	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
- && rs!=null && read($srcHeap, rs, alloc) && dtype(rs) == ER$Relship ==> 
-		read($srcHeap, att, ERAttribute.relship) == rs ==>
-			(exists l:ref :: l!=null &&
-				Seq#Contains(links,l) && Map#Elements(read($linkHeap, l, TransientLink#source))[_att] == att  && Map#Elements(read($linkHeap, l, TransientLink#source))[_rs] == rs ))
-&&
-(forall i: int:: 0<=i &&i <Seq#Length(links) ==>			
-			Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t] != null 
-		 && read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc)
-		 && getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_rs])) == Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t]
-		)
-}
 
 
 
-procedure RA2A_applys(links: Seq ref)
-requires $IsGoodHeap($tarHeap);
-requires links == NTransientLinkSet#getLinksByRule($linkHeap, _RA2A);
-requires RA2A_links($srcHeap,$linkHeap,$tarHeap,links);
+
+procedure RA2A_applys();
 requires surj_tar_model($srcHeap, $tarHeap);
 requires (forall att,rs: ref :: 
 	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
@@ -38,7 +16,7 @@ requires (forall att,rs: ref ::
 		read($srcHeap, att, ERAttribute.relship) == rs ==>
 		read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)), alloc) 
 	 && getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)) != null 
-	 && dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs))) == REL$Relation	);	// troublesome
+	 && dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs))) == REL$RELAttribute	);	
 modifies $tarHeap;
 ensures (forall att,rs: ref :: 
 	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
@@ -64,12 +42,17 @@ ensures (forall<alpha> $o: ref, $f: Field alpha ::
 	 || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 ensures surj_tar_model($srcHeap, $tarHeap);
+
+implementation RA2A_applys()
 {
 
 	var $i : int;
+	var links : Seq ref;
 	var link : ref;
 
-	
+	links := NTransientLinkSet#getLinksByRule($linkHeap, _RA2A);
+	assume RA2A_links($srcHeap,$linkHeap,$tarHeap,links);
+
 	$i:=0;
 
 		
@@ -105,7 +88,7 @@ ensures surj_tar_model($srcHeap, $tarHeap);
 
 
 procedure RA2A_apply (in: ref) returns ()
-    free requires surj_tar_model($srcHeap, $tarHeap);
+  free requires surj_tar_model($srcHeap, $tarHeap);
   free requires $linkHeap[in, TransientLink#rule]==_RA2A;  
   free requires $linkHeap[in, alloc] == true;
   free requires dtype(in) == Native$TransientLink;
@@ -242,4 +225,25 @@ stk := Seq#Take(stk, Seq#Length(stk)-2);
 call stk := OpCode#Pop(stk);
 
 
+}
+
+// properties of each link of e2r rule
+function RA2A_links(
+	$srcHeap:HeapType,
+	$linkHeap:HeapType,
+	$tarHeap:HeapType,
+	links: Seq ref):bool
+{
+(forall att,rs: ref :: 
+	att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute 
+ && rs!=null && read($srcHeap, rs, alloc) && dtype(rs) == ER$Relship ==> 
+		read($srcHeap, att, ERAttribute.relship) == rs ==>
+			(exists l:ref :: l!=null &&
+				Seq#Contains(links,l) && Map#Elements(read($linkHeap, l, TransientLink#source))[_att] == att  && Map#Elements(read($linkHeap, l, TransientLink#source))[_rs] == rs ))
+&&
+(forall i: int:: 0<=i &&i <Seq#Length(links) ==>			
+			Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t] != null 
+		 && read($tarHeap, Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t], alloc)
+		 && getTarsBySrcs(Seq#Build(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_att]), Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_rs])) == Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#target])[_t]
+		)
 }

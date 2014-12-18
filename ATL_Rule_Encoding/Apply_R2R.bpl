@@ -1,6 +1,6 @@
 /*
 rule R2R { from s : ER!Relship 
-           to t : REL!Relation ( name  <- s.name, schema <- s.schema  ) }
+           to t : REL!Relation ( name  <- s.name ) }
 
 */
 
@@ -8,10 +8,7 @@ rule R2R { from s : ER!Relship
   
 
 
-procedure R2R_applys(links:Seq ref)
-requires $IsGoodHeap($tarHeap);
-requires links == NTransientLinkSet#getLinksByRule($linkHeap, _R2R);
-requires R2R_links($srcHeap,$linkHeap,$tarHeap,links);
+procedure R2R_applys();
 requires surj_tar_model($srcHeap, $tarHeap);
 requires (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$Relship ==>
 		read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), alloc) 
@@ -27,10 +24,16 @@ ensures (forall<alpha> $o: ref, $f: Field alpha ::
 		((dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$Relship && $f == Relation.name) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 ensures surj_tar_model($srcHeap, $tarHeap);
+
+implementation R2R_applys()
 {
 
 	var $i : int;
 	var link : ref;
+	var links:Seq ref;
+
+    links := NTransientLinkSet#getLinksByRule($linkHeap, _R2R);
+    assume R2R_links($srcHeap,$linkHeap,$tarHeap,links);
 
 	$i:=0;
 

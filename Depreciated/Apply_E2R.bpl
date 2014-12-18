@@ -1,13 +1,8 @@
 /*
 rule E2R { from s : ER!Entity 
-		   to t : REL!Relation ( name  <- s.name, schema <- s.schema ) }
+		   to t : REL!Relation ( name  <- s.name ) }
 
 */
-
-
-
-  
-
 
 procedure E2R_applys(links: Seq ref)
 requires $IsGoodHeap($tarHeap);
