@@ -178,5 +178,33 @@ const classifierTable : [String, String] ClassName;
   axiom classifierTable[_#native, _TransientLink] == Native$TransientLink;
 
 
+function surj_tar_model($s: HeapType, $t: HeapType): bool
+{
+	(forall $o: ref :: $o!=null && read($t, $o, alloc) && dtype($o) == REL$RELSchema ==>
+		(exists $i: ref :: dtype($i) == ER$ERSchema && $i != null && read($s, $i, alloc) && getTarsBySrcs(Seq#Singleton($i))==$o))
+	&&
+	(forall $o: ref :: $o!=null && read($t, $o, alloc) && dtype($o) == REL$Relation ==>
+		(exists $i: ref :: (dtype($i) == ER$Entity || dtype($i)==ER$Relship) && $i != null && read($s, $i, alloc) && getTarsBySrcs(Seq#Singleton($i))==$o))
+}
 
+function valid_src_model($h: HeapType): bool
+{
+	(forall $i: ref ::
+	
+	($i!=null && read($h, $i, alloc) && dtype($i) == ER$ERSchema ==> 
+	 // ER$ERSchema => its [entities] feature is not null, and every of them is type of [ER$Entity], not [null], and is [allocated]
+		( read($h, $i, ERSchema.entities)!=null &&
+		 (forall j: int :: 0<=j && j<_System.array.Length(read($h, $i, ERSchema.entities)) ==> 
+		    ($Unbox(read($h, read($h, $i, ERSchema.entities), IndexField(j))): ref !=null 
+		      && read($h, $Unbox(read($h, read($h, $i, ERSchema.entities), IndexField(j))): ref, alloc)
+		      && dtype($Unbox(read($h, read($h, $i, ERSchema.entities), IndexField(j))): ref)==ER$Entity) ))
+	 // ER$ERSchema => its [relships] feature is not null, and every of them is type of [ER$Relship], not [null], and is [allocated]
+	 && ( read($h, $i, ERSchema.relships)!=null &&
+		 (forall j: int :: 0<=j && j<_System.array.Length(read($h, $i, ERSchema.relships)) ==> 
+		    ($Unbox(read($h, read($h, $i, ERSchema.relships), IndexField(j))): ref !=null 
+		      && read($h, $Unbox(read($h, read($h, $i, ERSchema.relships), IndexField(j))): ref, alloc)
+		      && dtype($Unbox(read($h, read($h, $i, ERSchema.relships), IndexField(j))): ref)==ER$Relship) ))
+	)
+)
+}
   

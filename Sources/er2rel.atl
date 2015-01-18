@@ -6,7 +6,7 @@ rule S2S { from s : ER!ERSchema
 								 relations <- s.relships)}
 
 rule E2R { from s : ER!Entity 
-		   to t : REL!Relation ( name  <- s.name, attrs <- s.attrs) }
+		   to t : REL!Relation ( name  <- s.name) }
 
 rule R2R { from s : ER!Relship 
            to t : REL!Relation ( name  <- s.name  ) }
@@ -14,7 +14,7 @@ rule R2R { from s : ER!Relship
 
 rule EA2A { from att : ER!ERAttribute, ent : ER!Entity (att.entity = ent)
 	        to t : REL!RELAttribute 
-				  ( name <- att.name, isKey <- att.isKey) }
+				  ( name <- att.name, isKey <- att.isKey, relation <- ent) }
 
 rule RA2A { from att : ER!ERAttribute, rs  : ER!Relship ( att.relship = rs )
 	        to t : REL!RELAttribute

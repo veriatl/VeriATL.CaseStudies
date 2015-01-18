@@ -290,13 +290,7 @@ __applyE2R
 12:	get name 
 13:	call A.__resolve__(J):J 
 14:	set name 
-15:	dup 
-16:	getasm 
-17:	load 2 
-18:	get attrs 
-19:	call A.__resolve__(J):J 
-20:	set attrs 
-21:	pop 
+15:	pop 
 __matchR2R
 	var: s:1
 	var: self:0
@@ -440,7 +434,12 @@ __applyEA2A
 22:	get isKey 
 23:	call A.__resolve__(J):J 
 24:	set isKey 
-25:	pop 
+25:	dup 
+26:	getasm 
+27:	load 3 
+28:	call A.__resolve__(J):J 
+29:	set relation 
+30:	pop 
 __matchRA2A
 	var: att:1
 	var: rs:2
