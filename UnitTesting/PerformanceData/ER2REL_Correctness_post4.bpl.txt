@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<boogie version="2.2.30705.1126" commandLine="boogie.exe /xml:ER2REL_Correctness_post4.bpl.txt /nologo Prelude/LibOCL.bpl Prelude/instr.bpl Prelude/nativeLib.bpl Prelude/metamodels.bpl ER2REL_Correctness_post4.bpl">
+  <file name="ER2REL_Correctness_post4.bpl">
+    <fileFragment name="Prelude/LibOCL.bpl" />
+    <fileFragment name="Prelude/instr.bpl" />
+    <fileFragment name="Prelude/nativeLib.bpl" />
+    <fileFragment name="Prelude/metamodels.bpl" />
+    <fileFragment name="ER2REL_Correctness_post4.bpl" />
+    <method name="NTransientLink#setRule" startTime="2015-02-07 16:11:35Z">
+      <conclusion endTime="2015-02-07 16:11:37Z" duration="1.3260023" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addSourceElement" startTime="2015-02-07 16:11:37Z">
+      <conclusion endTime="2015-02-07 16:11:37Z" duration="0.0156" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addTargetElement" startTime="2015-02-07 16:11:37Z">
+      <conclusion endTime="2015-02-07 16:11:37Z" duration="0" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getSourceElement" startTime="2015-02-07 16:11:37Z">
+      <conclusion endTime="2015-02-07 16:11:37Z" duration="0" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getTargetElement" startTime="2015-02-07 16:11:37Z">
+      <conclusion endTime="2015-02-07 16:11:37Z" duration="0" outcome="correct" />
+    </method>
+    <method name="driver" startTime="2015-02-07 16:11:37Z">
+      <conclusion endTime="2015-02-07 16:11:37Z" duration="0.561601" outcome="correct" />
+    </method>
+  </file>
+</boogie>

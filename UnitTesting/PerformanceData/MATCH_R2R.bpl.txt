@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<boogie version="2.2.30705.1126" commandLine="boogie.exe /xml:MATCH_R2R.bpl.txt /nologo Prelude/LibOCL.bpl Prelude/instr.bpl Prelude/nativeLib.bpl Prelude/metamodels.bpl MATCH_R2R.bpl">
+  <file name="MATCH_R2R.bpl">
+    <fileFragment name="Prelude/LibOCL.bpl" />
+    <fileFragment name="Prelude/instr.bpl" />
+    <fileFragment name="Prelude/nativeLib.bpl" />
+    <fileFragment name="Prelude/metamodels.bpl" />
+    <fileFragment name="MATCH_R2R.bpl" />
+    <method name="NTransientLink#setRule" startTime="2015-02-07 17:56:33Z">
+      <conclusion endTime="2015-02-07 17:56:34Z" duration="1.3104023" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addSourceElement" startTime="2015-02-07 17:56:34Z">
+      <conclusion endTime="2015-02-07 17:56:34Z" duration="0.0156" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addTargetElement" startTime="2015-02-07 17:56:34Z">
+      <conclusion endTime="2015-02-07 17:56:34Z" duration="0" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getSourceElement" startTime="2015-02-07 17:56:34Z">
+      <conclusion endTime="2015-02-07 17:56:34Z" duration="0.0156" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getTargetElement" startTime="2015-02-07 17:56:34Z">
+      <conclusion endTime="2015-02-07 17:56:34Z" duration="0" outcome="correct" />
+    </method>
+    <method name="R2R_match" startTime="2015-02-07 17:56:34Z">
+      <conclusion endTime="2015-02-07 17:56:34Z" duration="0.1092002" outcome="correct" />
+    </method>
+  </file>
+</boogie>

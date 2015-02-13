@@ -26,23 +26,6 @@
 */
 
 
-
-procedure EA2A_match();
-requires (forall att: ref :: att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute ==> 
-			(forall ent: ref :: ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
-				$srcHeap[att, ERAttribute.entity] == ent ==>
-				getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent))==null || !read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)), alloc)));
-modifies $tarHeap,$linkHeap;
-ensures (forall att: ref :: att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute ==> 
-			 (forall ent: ref :: ent!=null && read($srcHeap, ent, alloc) && dtype(ent) == ER$Entity ==> 
-				$srcHeap[att, ERAttribute.entity] == ent ==>
-				getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent))!=null && read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),ent)), alloc)));
-ensures (forall<alpha> $o : ref, $f: Field alpha ::
-	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$RELAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Entity && $f==alloc)));
-free ensures $HeapSucc(old($tarHeap), $tarHeap);
-free ensures $HeapSucc(old($linkHeap), $linkHeap);
-free ensures surj_tar_model($srcHeap, $tarHeap);
-
 implementation EA2A_match () returns ()
 {
 var stk: Seq BoxType;

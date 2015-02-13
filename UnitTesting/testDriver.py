@@ -9,8 +9,11 @@ FUTPath1 = "../ATL_Rule_Encoding/"	# test task 1
 FUTPath2 = "../ATL_Correctness/"	# test task 2
 
 tasks = [FUTPath1, FUTPath2]		# test tasks to run
+tasks_option_map = {FUTPath1: 1, FUTPath2: 2}
 
-def forgeRunningCommand(fName):
+
+# forge the cmd that executes Boogie, depending on the [option] that pass in, which stores at task_option_map.
+def forgeRunningCommand(fName, option):
 	command = []
 
 	command.append("Boogie")					# command
@@ -20,6 +23,9 @@ def forgeRunningCommand(fName):
 	command.append(libPath+"LibOCL.bpl")
 	command.append(libPath+"Metamodels.bpl")
 	command.append(libPath+"NativeLib.bpl")
+	
+	if option==2 :
+		command.append(libPath+"ATLRules.whole.bpl")	# library that specific to test suite 2
 
 	command.append(fName)	# input
 	
@@ -48,7 +54,7 @@ def BatchTest(isDetailed):
 			
 			for fn in filesNames:
 				# get output by execute boogie against input
-				myCmd = forgeRunningCommand(task+fn)
+				myCmd = forgeRunningCommand(task+fn, tasks_option_map[task])
 				p = subprocess.Popen(myCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 				out, err = p.communicate()
 
@@ -79,7 +85,7 @@ def executeSingle(task,fn):
 	print 
 	print 
 	print "FAILED TASK: "+ task + fn
-	myCmd = forgeRunningCommand(task+fn)
+	myCmd = forgeRunningCommand(task+fn, tasks_option_map[task])
 	p = subprocess.Popen(myCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
 	out, err = p.communicate()
 

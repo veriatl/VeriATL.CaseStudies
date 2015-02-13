@@ -1,4 +1,4 @@
-Regression Tests start at: 2015/01/18 16:40:23
+Regression Tests start at: 2015/02/13 16:49:55
  ========================================================================= 
 Folder: ../ATL_Rule_Encoding/
 	checking Apply_E2R.bpl [pass]
@@ -19,3 +19,4 @@ Folder: ../ATL_Correctness/
 	checking ER2REL_Correctness_post3.bpl [pass]
 	checking ER2REL_Correctness_post4.bpl [pass]
 	checking Optimization_Validation.bpl [pass]
+<<< Process finished. (Exit code 0)

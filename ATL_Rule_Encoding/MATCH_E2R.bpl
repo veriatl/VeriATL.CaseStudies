@@ -7,7 +7,7 @@ rule E2R { from s : ER!Entity
 
 procedure E2R_match();
 requires (forall s: ref :: s!=null && read($srcHeap, s, alloc) && dtype(s) == ER$Entity ==> 
-		getTarsBySrcs(Seq#Singleton(s))==null || !read($tarHeap, getTarsBySrcs(Seq#Singleton(s)), alloc));
+		 !read($tarHeap, getTarsBySrcs(Seq#Singleton(s)), alloc));
 modifies $tarHeap,$linkHeap;
 ensures (forall s: ref :: s!=null && read($srcHeap, s, alloc) && dtype(s) == ER$Entity ==> 
 		getTarsBySrcs(Seq#Singleton(s))!=null 

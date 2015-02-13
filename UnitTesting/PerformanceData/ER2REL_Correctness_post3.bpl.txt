@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<boogie version="2.2.30705.1126" commandLine="boogie.exe /xml:ER2REL_Correctness_post3.bpl.txt /nologo Prelude/LibOCL.bpl Prelude/instr.bpl Prelude/nativeLib.bpl Prelude/metamodels.bpl ER2REL_Correctness_post3.bpl">
+  <file name="ER2REL_Correctness_post3.bpl">
+    <fileFragment name="Prelude/LibOCL.bpl" />
+    <fileFragment name="Prelude/instr.bpl" />
+    <fileFragment name="Prelude/nativeLib.bpl" />
+    <fileFragment name="Prelude/metamodels.bpl" />
+    <fileFragment name="ER2REL_Correctness_post3.bpl" />
+    <method name="NTransientLink#setRule" startTime="2015-02-07 16:11:31Z">
+      <conclusion endTime="2015-02-07 16:11:32Z" duration="1.3124024" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addSourceElement" startTime="2015-02-07 16:11:32Z">
+      <conclusion endTime="2015-02-07 16:11:32Z" duration="0.0156" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addTargetElement" startTime="2015-02-07 16:11:32Z">
+      <conclusion endTime="2015-02-07 16:11:32Z" duration="0" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getSourceElement" startTime="2015-02-07 16:11:32Z">
+      <conclusion endTime="2015-02-07 16:11:32Z" duration="0.0156" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getTargetElement" startTime="2015-02-07 16:11:32Z">
+      <conclusion endTime="2015-02-07 16:11:32Z" duration="0" outcome="correct" />
+    </method>
+    <method name="driver" startTime="2015-02-07 16:11:32Z">
+      <error message="postcondition violation" file="ER2REL_Correctness_post3.bpl" line="81" column="1">
+        <related file="ER2REL_Correctness_post3.bpl" line="47" column="3" />
+        <trace>
+          <traceNode label="PreconditionGeneratedEntry" />
+          <traceNode file="ER2REL_Correctness_post3.bpl" line="60" column="2" label="anon0" />
+        </trace>
+      </error>
+      <conclusion endTime="2015-02-07 16:11:33Z" duration="0.6084011" outcome="errors" />
+    </method>
+  </file>
+</boogie>
