@@ -17,39 +17,39 @@ Overview of Repository
 Libraries
 ------
 VeriATL system is driven by two essential Boogie Libraries:
-- Library for Metamodel & OCL [portal]()
-- Library for ASM bytecode formalisation [portal]()
+- Library for Metamodel & OCL [portal](https://github.com/VeriATL/VeriATL/blob/master/Prelude/LibOCL.bpl)
+- Library for ASM bytecode formalisation [portal](https://github.com/VeriATL/VeriATL/blob/master/Prelude/Instr.bpl)
 
 The Source Files for ATL Transformation
 ------
 We demonstrate VeriATL system against ER2REL transformation. The source files of this transformation contain:
-- Source (ER-Diagram) and target (RELational-Schema) metamodels [portal]()
-- ER2REL transformation specification in ATL [portal]()
-- The compiled ER2REL transformation in ASM [portal]()
+- Source (ER-Diagram) and target (RELational-Schema) metamodels [portal](https://github.com/VeriATL/VeriATL/tree/master/Sources)
+- ER2REL transformation specification in ATL [portal](https://github.com/VeriATL/VeriATL/blob/master/Sources/er2rel.atl)
+- The compiled ER2REL transformation in ASM [portal](https://github.com/VeriATL/VeriATL/blob/master/Sources/er2rel.asm)
 
 Verifying sound encoding of ATL rules
 ------
-Both metamodels and ATL specification are encoded in Boogie for verifying sound encoding of ATL rules.
-- metamodels [portal]()
-- ATL rules [portal]()
+Our main contribution is verifying the soundness of our encoding for the execution semantics of ATL rules. To perform this verification, both metamodels and ATL specification are encoded in Boogie.
+- metamodels [portal](https://github.com/VeriATL/VeriATL/blob/master/Prelude/Metamodels.bpl)
+- **ATL rules** [portal](https://github.com/VeriATL/VeriATL/tree/master/ATL_Rule_Encoding)
 
 
 Transformation contracts verification
 ------
 Using the sound encoding of ATL rules, we can verify transformation specification against transformation contracts. We verify ER2REL transformation against 4 OCL contracts. The focus here is to demonstrate OCL contracts encoding and transformation rules scheduling.
-1. The uniqueness of *RELSchema*s' name [portal]()
-2. The uniqueness of *Relation*s' name in *RELSchema* [portal]()
-3. The uniqueness of *RELAttribute*s' name in *Relation* [portal]()
-4. The existence of *Relation*s' *key* in *RELAttribute* [portal]()
+1. The uniqueness of *RELSchema*s' name [portal](https://github.com/VeriATL/VeriATL/blob/master/ATL_Correctness/ER2REL_Correctness_post1.bpl)
+2. The uniqueness of *Relation*s' name in *RELSchema* [portal](https://github.com/VeriATL/VeriATL/blob/master/ATL_Correctness/ER2REL_Correctness_post2.bpl)
+3. The uniqueness of *RELAttribute*s' name in *Relation* [portal](https://github.com/VeriATL/VeriATL/blob/master/ATL_Correctness/ER2REL_Correctness_post3.bpl)
+4. The existence of *Relation*s' *key* in *RELAttribute* [portal](https://github.com/VeriATL/VeriATL/blob/master/ATL_Correctness/ER2REL_Correctness_post4.bpl)
 
-To modularize the verification task, the encodings of ATL rules are encapsulated in this file [portal]().
+To modularize the verification task, the encodings of ATL rules are encapsulated in this file [portal](https://github.com/VeriATL/VeriATL/blob/master/Prelude/ATLRules.whole.bpl).
 
 
 Regression Tests + Test Driver + Result
 ------
-Finally, to ensure validity of our approach. The [regression tests]() are executed on every modification of Boogie libraries, or modifications to the Boogie code compilation process (i.e. OCL compilation, ATL rules compilation and ASM code compilation to Boogie). A [test driver]() written in Python is provided to run regression tests. It needs Boogie installed [HowTo](https://boogie.codeplex.com/wikipage?title=Binaries).
+Finally, to ensure validity of our approach. The [regression tests](https://github.com/VeriATL/VeriATL/tree/master/UnitTesting) are executed on every modification to the Boogie libraries, or modifications to the Boogie code compilation process (i.e. OCL compilation, ATL rules compilation and ASM code compilation to Boogie). A [test driver](https://github.com/VeriATL/VeriATL/blob/master/UnitTesting/testDriver.py) written in Python is provided to run regression tests. It needs Boogie installed [HowTo](https://boogie.codeplex.com/wikipage?title=Binaries).
 
-We also record the result [portal]() and performance [portal]() of regression tests in XML for people who interested.
+We also record the **result** [portal](https://github.com/VeriATL/VeriATL/blob/master/UnitTesting/RegressionResult.txt) and **performance** [portal](https://github.com/VeriATL/VeriATL/tree/master/UnitTesting/PerformanceData) of regression tests for reader who interested.
 
 
 ------
