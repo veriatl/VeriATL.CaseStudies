@@ -36,7 +36,8 @@ Our main contribution is verifying the soundness of our encoding for the executi
 
 Transformation contracts verification
 ------
-Using the sound encoding of ATL rules, we can verify transformation specification against transformation contracts. We verify ER2REL transformation against 4 OCL contracts. The focus here is to demonstrate OCL contracts encoding and transformation rules scheduling.
+Using the sound encoding of ATL rules, we can verify transformation specification against transformation contracts. We verify ER2REL transformation against 4 OCL contracts. The focus here is to demonstrate OCL contracts encoding and transformation rules scheduling:
+
 1. The uniqueness of *RELSchema*s' name [portal](https://github.com/VeriATL/VeriATL/blob/master/ATL_Correctness/ER2REL_Correctness_post1.bpl)
 2. The uniqueness of *Relation*s' name in *RELSchema* [portal](https://github.com/VeriATL/VeriATL/blob/master/ATL_Correctness/ER2REL_Correctness_post2.bpl)
 3. The uniqueness of *RELAttribute*s' name in *Relation* [portal](https://github.com/VeriATL/VeriATL/blob/master/ATL_Correctness/ER2REL_Correctness_post3.bpl)
