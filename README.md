@@ -8,17 +8,25 @@ In this work we present a translation validation approach to encode a sound exec
 
 Overview of Repository
 ------
-1. Libraries
+0. Libraries
+1. Translational Semantics of ASM
 2. The Source Files for ATL Transformation
 3. Encoding soundness verification
 4. Transformation contracts verification
 5. Regression Tests + Driver + Result
+
 
 Libraries
 ------
 VeriATL system is driven by two essential Boogie Libraries:
 - Library for Metamodel & OCL [portal](https://github.com/VeriATL/VeriATL/blob/master/Prelude/LibOCL.bpl)
 - Library for ASM bytecode formalisation [portal](https://github.com/VeriATL/VeriATL/blob/master/Prelude/Instr.bpl)
+
+
+Translational Semantics of ASM
+------
+Our ASM bytecode formalisation is based on the [translational semantics of ASM language](https://github.com/VeriATL/VeriATL/blob/master/Doc/semantics.pdf).
+
 
 The Source Files for ATL Transformation
 ------

@@ -1,0 +1,266 @@
+\documentclass{llncs}
+\usepackage{llncsdoc}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage[font=footnotesize]{subcaption}
+\usepackage{amssymb}
+\usepackage{syntax}
+\usepackage[hyphens]{url}
+\usepackage{textcomp}
+\usepackage{amsthm}
+\usepackage{boogie}
+\usepackage{bm}
+\usepackage{cite}
+\usepackage{titlesec}
+
+\begin{document}
+
+
+
+
+
+\title{Translational Semantics of ASM language in Boogie\\
+}
+\author{
+Zheng Cheng \and
+Rosemary Monahan \and
+James F. Power
+}
+
+\institute{
+Computer Science Department, Maynooth University, Co. Kildare, Ireland\\
+\email{\{zcheng, rosemary, jpower\}@cs.nuim.ie}
+}
+
+\maketitle
+
+
+
+\label{app:asm}
+
+\begin{table}
+  \scriptsize
+  \centering
+  \captionsetup{font=normalsize}
+  \begin{tabular}{p{85} | l }
+\hline\\[-8pt]
+
+% Header
+\textbf{ASM Instruction (S)}
+&
+\textbf{Corresponding Boogie Statements (\textlbrackdbl S\textrbrackdbl)}
+\\
+\hline
+
+% Rule 
+ 		\multicolumn{2}{c}{Stack Handling Instructions} \\
+ 		\hline
+
+% 			#01
+\textbf{\textbf{push$_{\tau}$ $c$}} 
+& 
+Stk := \textlbrackdbl $c$\textrbrackdbl::Stk ; (where $c$ is a constant of type $\tau$ $\in$ $\{int, bool, string\}$)
+
+\\ 
+\hline
+
+
+% 			#02
+\textbf{$\textbf{pop}$}
+&
+\texttt{assert} size(Stk)$>$0 ; Stk := tl(Stk) ;
+\\ 
+\hline
+
+
+% 			#03
+\textbf{$\textbf{store}$ $x$ }
+&
+\texttt{assert} size(Stk)$>$0 ; $x$ := hd(Stk) ; Stk := tl(Stk) ; (where $x$ is a variable)
+    \\ 
+\hline
+
+% 			#04
+\textbf{$\textbf{load}$ $x$ }
+&
+Stk := $x$::Stk ; (where $x$ is a variable)
+    \\ 
+\hline
+
+% 			#05
+\textbf{$\textbf{swap}$}
+&
+\texttt{assert} size(Stk)$>$1 ; Stk := hd(tl(Stk))::hd(Stk)::tl(tl(Stk)) ;
+    \\ 
+\hline
+
+% 			#06
+\textbf{$\textbf{dup}$ }
+&
+\texttt{assert} size(Stk)$>$0 ; Stk := hd(Stk)::Stk ;
+    \\ 
+\hline
+
+
+% 			#07
+\textbf{$\textbf{dup\_x1}$}
+&
+\texttt{assert} size(Stk)$>$1 ; Stk := hd(Stk)::hd(tl(Stk))::hd(Stk)::tl(tl(Stk)) ;
+    \\ 
+\hline
+
+%			#TITLE
+ 		\multicolumn{2}{c}{Control Instructions} \\
+ 		\hline
+
+% 			#08
+\textbf{if\ $Stmt_1$\ $\textbf{else}$\ $Stmt_2$} &
+\begin{array}
+\ 
+$\texttt{var} cond$^{\#}$: bool ;$ \\
+$\texttt{assert} size(Stk) $>$ 0 ; cond$^{\#}$ := hd(Stk) ; Stk := tl(Stk) ;$ \\
+$\texttt{if}\ (cond$^{\#}$)\ \textlbrackdbl $Stmt_1$\textrbrackdbl\ \texttt{else}\ \textlbrackdbl $Stmt_2$\textrbrackdbl$
+\end{array}
+
+    \\ 
+\hline
+
+% 			#09
+\textbf{$\textbf{goto}$\ $n$ \  } 
+&
+\begin{array}
+\ 
+$\texttt{goto} $l$ ; $
+ $(where $l$ is a fresh label. It lables the program point which$ 
+\\ $corresponds to the ASM instruction offset $n$)$
+\end{array}
+
+    \\ 
+\hline
+
+% 			#10
+\textbf{$\textbf{iter}$\ $Stmt_1$\ $\textbf{enditer}$ }
+&
+\begin{array}
+\ 
+$\texttt{var} col$^{\#}$: Collection ;$ \\
+$\texttt{assert} size(Stk) $>$ 0 ; col$^{\#}$ := hd(Stk) ; Stk := tl(Stk) ;$ \\
+$\texttt{while} (hasNext(col$^{\#}$))\ $INV$\ \{ Stk := next(col$^{\#}$)::Stk\ ;\ \textlbrackdbl $Stmt_1$\textrbrackdbl \} $
+\end{array}
+
+
+
+    \\ 
+\hline
+
+% 			#11
+\textbf{$\textbf{pcall}$\ $sig$}
+&
+
+\begin{array}
+% reflect : name \times context \\
+$let\ n = arg\_size(sig)\ in \\
+\  let\ \overline{args} = tk(Stk, n),\ ctx = hd(dp(Stk, n))\ in \\
+\ \ \     $\texttt{assert} size(Stk) $>$ $n$\ ;\ \texttt{call}\ invoke(reflect($sig$, $ctx$), \overline{args})\ ;$\\ 
+\ \ \     $Stk := dp(Stk, $n$+1)\ ;$
+$
+\end{array}
+    \\ 
+\hline
+
+% 			#12
+\textbf{$\textbf{call}$\ $sig$}
+&
+
+\begin{array}
+$let\ n = arg\_size(sig)\ in \\
+\  let\ \overline{args} = tk(Stk, n),\ ctx = hd(dp(Stk, n))\ in \\
+\ \ \     $\texttt{var} result$^{\#}$ : $T$ ;$ \\
+\ \ \     $\texttt{assert} size(Stk) $>$ $n$\ ;\ \texttt{call}\ result$^{\#}$ := invoke(reflect($sig$, $ctx$), $\overline{args}$)\ ; $\\
+\ \ \     $Stk := result$^{\#}$::dp(Stk, $n$+1)\ ; $
+$
+\\ $(where $T$ is the return type of the reflected method)$
+\end{array}
+
+    \\ 
+\hline
+
+%			#TITLE
+ 		\multicolumn{2}{c}{Model Handling Instructions} \\
+ 		\hline
+% 			#13
+\textbf{new $r$}
+&
+\begin{array}
+$let\ mm = hd(Stk),\ cl = hd(tl(Stk))\ in \\
+\ let\ clazz = resolve(mm, cl)\ in: \\
+\ \ \ $\texttt{var} $r^{\#}$ : Ref ;$ \\
+\ \ \ $\texttt{havoc} $r^{\#}$ ; \texttt{assume} $r^{\#}$ \neq null \land \neg $read$($heap$,r^{\#},alloc)\ ; $\\
+\ \ \ $\texttt{assert} size(Stk) $>$ 1 ; $\\
+\ \ \ $\texttt{assume} typeof($r^{\#}$) = $clazz$ ; heap := update(heap,$r^{\#}$,$alloc$,$true$); Stk := $r^{\#}$::tl(tl(Stk)) ; $
+$
+\end{array}
+    \\ 
+\hline
+
+% 			#14
+\textbf{get $f$ }
+&
+\begin{array}
+$let\ o = hd(Stk)\ in \\
+\ $\texttt{assert} size(Stk) $>$ 0 \land\ o \neq null\ \land\ $read$($heap$,o,alloc)\ ; $\\
+\ $Stk := read(heap,$o$,$f$)::tl(Stk) ; $
+$
+\end{array}
+
+    \\ 
+\hline
+
+% 			#15
+\textbf{$\textbf{set}$\ $f$}
+&
+\begin{array}
+	$let\ o = hd(tl(Stk)),\ v = hd(Stk)\ in $\\
+	$\ \ \texttt{assert}\ size(Stk) $>$ 1 \land\ o \neq null\ \land\ $read$($heap$,o,alloc)\ ; $\\
+	$\ \ \texttt{if}\ (isCollection(f)) \{\ heap := update(heap,read(heap,$o$,$f$),read(heap,$o$,$f$) \cup\ v) ; \} $\\
+	$\ \ \texttt{else}\ \{\ heap := update(heap,$o$,$f$,$v$) ; \}$\\
+	$\ \ Stk := tl(tl(Stk)); $ \\
+
+\end{array}
+
+    \\ 
+\hline
+
+% 			#16
+\textbf{findme}
+&
+\begin{array}
+$let\ mm = hd(Stk),\ cl = hd(tl(Stk))\ in \\
+\ $\texttt{assert} size(Stk) $>$ 1 ; Stk := resolve($mm$, $cl$)::tl(tl(Stk)) ;$
+$
+
+\end{array}
+
+
+    \\ 
+\hline
+
+% 			#17
+\textbf{getasm }
+&
+\begin{array}
+\ 
+$Stk := ASM::Stk ;$
+\end{array}
+
+    \\ 
+\hline
+
+% TODO: Havn't say nothing else is changed on the heap
+
+  \end{tabular}
+\end{table}
+
+\end{document}
