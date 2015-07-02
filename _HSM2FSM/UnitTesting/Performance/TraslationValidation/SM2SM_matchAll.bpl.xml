@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<boogie version="2.2.30705.1126" commandLine="boogie.exe /nologo /xml:SM2SM_matchAll.bpl.xml Prelude/ATLRules.whole.bpl Prelude/LibOCL.bpl Prelude/instr.bpl Prelude/nativeLib.bpl Prelude/metamodels.bpl SM2SM_matchAll.bpl">
+  <file name="SM2SM_matchAll.bpl">
+    <fileFragment name="Prelude/ATLRules.whole.bpl" />
+    <fileFragment name="Prelude/LibOCL.bpl" />
+    <fileFragment name="Prelude/instr.bpl" />
+    <fileFragment name="Prelude/nativeLib.bpl" />
+    <fileFragment name="Prelude/metamodels.bpl" />
+    <fileFragment name="SM2SM_matchAll.bpl" />
+    <method name="NTransientLink#setRule" startTime="2015-06-14 15:14:23Z">
+      <conclusion endTime="2015-06-14 15:14:24Z" duration="1.5420882" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addSourceElement" startTime="2015-06-14 15:14:24Z">
+      <conclusion endTime="2015-06-14 15:14:24Z" duration="0.0070004" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addTargetElement" startTime="2015-06-14 15:14:24Z">
+      <conclusion endTime="2015-06-14 15:14:24Z" duration="0.0080005" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getSourceElement" startTime="2015-06-14 15:14:24Z">
+      <conclusion endTime="2015-06-14 15:14:24Z" duration="0.0020001" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getTargetElement" startTime="2015-06-14 15:14:24Z">
+      <conclusion endTime="2015-06-14 15:14:24Z" duration="0.0030002" outcome="correct" />
+    </method>
+    <method name="SM2SM_matchAllTest" startTime="2015-06-14 15:14:24Z">
+      <conclusion endTime="2015-06-14 15:14:24Z" duration="0.1240071" outcome="correct" />
+    </method>
+  </file>
+</boogie>

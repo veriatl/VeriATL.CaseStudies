@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<boogie version="2.2.30705.1126" commandLine="boogie.exe /nologo /xml:unique_fsm_sm_names.bpl.xml Prelude/ATLRules.whole.bpl Prelude/LibOCL.bpl Prelude/instr.bpl Prelude/nativeLib.bpl Prelude/metamodels.bpl unique_fsm_sm_names.bpl">
+  <file name="unique_fsm_sm_names.bpl">
+    <fileFragment name="Prelude/ATLRules.whole.bpl" />
+    <fileFragment name="Prelude/LibOCL.bpl" />
+    <fileFragment name="Prelude/instr.bpl" />
+    <fileFragment name="Prelude/nativeLib.bpl" />
+    <fileFragment name="Prelude/metamodels.bpl" />
+    <fileFragment name="unique_fsm_sm_names.bpl" />
+    <method name="NTransientLink#setRule" startTime="2015-05-29 15:07:55Z">
+      <conclusion endTime="2015-05-29 15:07:56Z" duration="1.3114024" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addSourceElement" startTime="2015-05-29 15:07:56Z">
+      <conclusion endTime="2015-05-29 15:07:56Z" duration="0.0156" outcome="correct" />
+    </method>
+    <method name="NTransientLink#addTargetElement" startTime="2015-05-29 15:07:56Z">
+      <conclusion endTime="2015-05-29 15:07:56Z" duration="0" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getSourceElement" startTime="2015-05-29 15:07:56Z">
+      <conclusion endTime="2015-05-29 15:07:56Z" duration="0.0156" outcome="correct" />
+    </method>
+    <method name="NTransientLink#getTargetElement" startTime="2015-05-29 15:07:56Z">
+      <conclusion endTime="2015-05-29 15:07:56Z" duration="0" outcome="correct" />
+    </method>
+    <method name="unique_fsm_sm_names" startTime="2015-05-29 15:07:56Z">
+      <conclusion endTime="2015-05-29 15:08:00Z" duration="4.0092071" outcome="correct" />
+    </method>
+  </file>
+</boogie>

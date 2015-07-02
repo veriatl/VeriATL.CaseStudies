@@ -1,0 +1,2 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<boogie version="2.2.30705.1126" commandLine="boogie.exe /nologo /xml:HSM2FSM.atl.xml Prelude/ATLRules.whole.bpl Prelude/LibOCL.bpl Prelude/instr.bpl Prelude/nativeLib.bpl Prelude/metamodels.bpl HSM2FSM.atl" />

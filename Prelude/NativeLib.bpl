@@ -14,7 +14,10 @@ function getTarsBySrcs(Seq ref): ref;
 function getTarsBySrcs_inverse(ref): Seq ref;
 axiom (forall i: Seq ref :: { getTarsBySrcs(i) } getTarsBySrcs_inverse(getTarsBySrcs(i)) == i);
 
+function getTarsBySrcs2(Seq ref): ref;
 
+function getTarsBySrcs2_inverse(ref): Seq ref;
+axiom (forall i: Seq ref :: { getTarsBySrcs2(i) } getTarsBySrcs2_inverse(getTarsBySrcs2(i)) == i);
 
 
 procedure NTransientLink#setRule
@@ -23,7 +26,7 @@ returns
 	(newStk: Seq BoxType)
   requires Seq#Length(stk) >= 2; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):String == ruleName;
-  requires dtype(link) == Native$TransientLink;
+  requires dtype(link) <: Native$TransientLink;
   modifies $linkHeap;
   ensures read($linkHeap, link, TransientLink#rule) == ruleName;
   ensures (forall<T> $f: Field T :: $f!=TransientLink#rule ==> 
@@ -47,7 +50,7 @@ returns
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):ref == val;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):String == key;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-3)):ref == link;
-  requires dtype(link) == Native$TransientLink;
+  requires dtype(link) <: Native$TransientLink;
   modifies $linkHeap;
   ensures read($linkHeap, link, TransientLink#source) == Map#Build(old($linkHeap[link, TransientLink#source]), key, val);
   ensures (forall<T> $f: Field T :: $f!=TransientLink#source ==> 
@@ -71,7 +74,7 @@ returns
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):ref == val;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):String == key;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-3)):ref == link;
-  requires dtype(link) == Native$TransientLink;
+  requires dtype(link) <: Native$TransientLink;
   modifies $linkHeap;
   ensures read($linkHeap, link, TransientLink#target) == Map#Build(old($linkHeap[link, TransientLink#target]), key, val);
   ensures (forall<T> $f: Field T :: $f!=TransientLink#target ==> 
@@ -93,7 +96,7 @@ returns
   requires Seq#Length(stk) >= 2; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):String == key;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):ref == link;
-  requires dtype(link) == Native$TransientLink;
+  requires dtype(link) <: Native$TransientLink;
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#source])[key]));
 {
 	newStk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#source])[key]));
@@ -106,7 +109,7 @@ returns
   requires Seq#Length(stk) >= 2; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):String == key;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):ref == link;
-  requires dtype(link) == Native$TransientLink; 
+  requires dtype(link) <: Native$TransientLink; 
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#target])[key]));
 {
 	newStk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#target])[key]));
@@ -129,6 +132,7 @@ function ASM#Resolve#Sem<alpha>(this: ref, heap: HeapType, elem: alpha) : BoxTyp
 	axiom (forall this:ref, heap: HeapType, elem: int ::
 		ASM#Resolve#Sem(this, heap, elem) == $Box(elem)
 	);
+
 	
 function invisble#getLinkbySources(s: Set ref): ref;
   axiom (forall s1,s2 : Set ref :: !Set#Equal(s1,s2) ==> 
@@ -144,7 +148,7 @@ function Fun#LIB#AllInstanceFrom(h:HeapType, t: ClassName): Seq ref;
   // all the model elements contained by the return result are of type $t$.
   axiom (forall h:HeapType, t: ClassName, i:int :: 
 	( 0<=i && i<Seq#Length(Fun#LIB#AllInstanceFrom(h,t)) ) ==> 
-		dtype( Seq#Index(Fun#LIB#AllInstanceFrom(h,t),i) ) == t
+		dtype( Seq#Index(Fun#LIB#AllInstanceFrom(h,t),i) ) <: t
   );
   // all the model elements contained by the return result are allocated
   axiom (forall h:HeapType, t: ClassName, i:int :: 
@@ -153,7 +157,7 @@ function Fun#LIB#AllInstanceFrom(h:HeapType, t: ClassName): Seq ref;
   );
   // all the allocated ref that of type $t$ are contained by the return result. 
   axiom (forall h:HeapType, o: ref, t: ClassName :: 
-	(h[o, alloc] && (dtype(o) == t)) ==>
+	(h[o, alloc] && (dtype(o) <: t)) ==>
 		Seq#Contains(Fun#LIB#AllInstanceFrom(h,t),o)
   );
   // all the model elements contained by the return result are unique 
@@ -193,14 +197,8 @@ function NTransientLinkSet#getLinksByRule(h:HeapType, rule: String): Seq ref;
 function top(Seq BoxType): BoxType;
   axiom (forall stk: Seq BoxType :: top(stk) == Seq#Index(stk, Seq#Length(stk)-1));
 
-function isSrcRef(ref) : bool;
-  axiom (forall o: ref :: (dtype(o)==ER$ERSchema || dtype(o) == ER$ERAttribute || dtype(o) == ER$Entity) <==> isSrcRef(o));
-  
-function getSrcLink(ref): ref;
-  axiom (forall o1,o2:ref :: o1 == o2 && isSrcRef(o1) ==> (getSrcLink(o1) == getSrcLink(o2) && dtype(getSrcLink(o1)) == Native$TransientLink ));
-  
-axiom (forall o1,o2: ref :: o1 == o2 ==> dtype(o1) == dtype(o2));
 
+  
 
 procedure OCL#Object#Equal<T> (stk: Seq BoxType, o1: T, o2: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
@@ -420,3 +418,41 @@ procedure OCL#Bag#Flatten<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: 
 // ---------------------------------------------------------------
 // -- OCL: Integer, X operations             ---------------------
 // ---------------------------------------------------------------
+
+procedure OCLAny#IsUndefined(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	$Unbox(Seq#Index(stk,Seq#Length(stk)-1)) == null
+  )));
+  
+  
+procedure OCLAny#Not(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	!($Unbox(Seq#Index(stk,Seq#Length(stk)-1)): bool)
+  )));
+
+procedure OCLAny#And(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)): bool) &&
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)): bool)
+  )));
+
+procedure OCLAny#Equal<T>(stk: Seq BoxType,o1:T,o2:T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	o1 == o2
+  )));
+  
+procedure OCLAny#IsTypeof(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	dtype($Unbox(Seq#Index(stk,Seq#Length(stk)-2)): ref) == $Unbox(Seq#Index(stk,Seq#Length(stk)-1)): ClassName
+  )));  
+  
+procedure OCLAny#IsKindof(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	dtype($Unbox(Seq#Index(stk,Seq#Length(stk)-2)): ref) <: $Unbox(Seq#Index(stk,Seq#Length(stk)-1)): ClassName
+  )));  

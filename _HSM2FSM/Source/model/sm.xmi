@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ASCII"?>
+<sm:StateMachine xmi:version="2.0" 
+  xmlns:xmi="http://www.omg.org/XMI" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:sm="http://sm/1.0">
+	<states xsi:type="sm:InitialState" name="1" />
+	<states xsi:type="sm:CompositeState" name="2"/>
+	<states xsi:type="sm:InitialState" name="3" compositeState="/0/@states.1"/>
+	<states xsi:type="sm:RegularState" name="4" compositeState="/0/@states.1"/>
+	<transitions label="on" source="/0/@states.0" target="/0/@states.1" />
+	<transitions label="off" source="/0/@states.1" target="/0/@states.0" />
+	<transitions label="x" source="/0/@states.2" target="/0/@states.3" />
+</sm:StateMachine>

@@ -1,0 +1,33 @@
+Regression Tests start at: 2015/07/02 12:40:28
+ ========================================================================= 
+Folder: ../_HSM2FSM/
+  /ATL_Correctness/
+	checking 00.unique_fsm_sm_names.bpl [pass]
+	checking 01.unique_fsm_state_names.bpl [pass]
+	checking 02.fsm_state_multi_lower.bpl [pass]
+	checking 03.fsm_state_multi_upper.bpl [pass]
+	checking 04.fsm_transition_multi_lower.bpl [pass]
+	checking 05.fsm_transition_multi_upper.bpl [pass]
+	checking 06.fsm_transition_src_multi_lower.bpl [pass]
+	checking 07.fsm_transition_src_multi_upper.bpl [pass]
+	checking 08.fsm_transition_trg_multi_lower.bpl [pass]
+	checking 09.fsm_transition_trg_multi_upper.bpl [pass]
+	checking 10.fsm_transition_src_contain_sm.bpl [pass]
+	checking 11.fsm_transition_trg_contain_sm.bpl [pass]
+	checking 12.fsm_transition_contain_sm.bpl [pass]
+  /ATL_Rule_Encoding/
+	checking IS2IS_applyAll.bpl [pass]
+	checking IS2IS_matchAll.bpl [pass]
+	checking IS2RS_applyAll.bpl [pass]
+	checking IS2RS_matchAll.bpl [pass]
+	checking RS2RS_applyAll.bpl [pass]
+	checking RS2RS_matchAll.bpl [pass]
+	checking SM2SM_applyAll.bpl [pass]
+	checking SM2SM_matchAll.bpl [pass]
+	checking T2TA_applyAll.bpl [pass]
+	checking T2TA_matchAll.bpl [pass]
+	checking T2TB_applyAll.bpl [pass]
+	checking T2TB_matchAll.bpl [pass]
+	checking T2TC_applyAll.bpl [pass]
+	checking T2TC_matchAll.bpl [pass]
+<<< Process finished. (Exit code 0)

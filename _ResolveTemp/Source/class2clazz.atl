@@ -1,0 +1,26 @@
+module class2clazz;
+
+create OUT : Clazz from IN : Class;
+
+rule ARefToBRef {
+	from
+		aRef : Class!ARef
+	to
+		bRef : Clazz!BRef (
+			name <- aRef.name,
+			ref <- thisModule.resolveTemp(aRef.ref, 'b')
+			--# curious? ref <- thisModule.resolveTemp(Seq{b,c},'b'), where b,c map to something
+		)
+}
+
+rule AtoAnnotedB {
+	from
+		a : Class!A
+	to
+		b : Clazz!B (
+			annotation <- ann,
+			name <- a.name
+		),
+		ann : Clazz!Annotation ( tag <- '0')
+		
+}
