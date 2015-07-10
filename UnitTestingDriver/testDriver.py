@@ -18,11 +18,11 @@ Proj2 = "../_ER2REL/"			# task 2
 Proj3 = "../_ResolveTemp/"		# task 3
 
 # PROJ TO VERIFY
-Projs = [Proj3]	
+Projs = [Proj1, Proj2]	
 
 # WHAT OPTION TO VERIFY EACH PROJ
-Projs_option_map = { Proj1: {_OPT_VERIFICATION, _OPT_VALIDATION}, 
-                     Proj2: {_OPT_VERIFICATION, _OPT_VALIDATION},    
+Projs_option_map = { Proj1: {_OPT_VALIDATION}, 
+                     Proj2: {_OPT_VALIDATION},    
                      Proj3: {_OPT_VERIFICATION}    }
 
 # BOOGIE ARGS

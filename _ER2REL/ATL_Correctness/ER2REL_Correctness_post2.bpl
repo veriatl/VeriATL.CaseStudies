@@ -4,7 +4,7 @@ procedure driver()
   requires valid_src_model($srcHeap);
   // unique schema names
   requires (forall $i1, $i2: ref :: $i1!=$i2 && $i1!=null && read($srcHeap, $i1, alloc) && dtype($i1) == ER$ERSchema
-				&& $i2!=null && read($srcHeap, $i2, alloc) && dtype($i2) == ER$ERSchema ==>
+				&& $i2!=null && read($srcHeap, $i2, alloc) && dtype($i2) <: ER$ERSchema ==>
 				read($srcHeap, $i1, ERSchema.name) != read($srcHeap, $i2, ERSchema.name));
   // entity names are unique in schema
   requires (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$ERSchema ==> 
@@ -13,7 +13,7 @@ procedure driver()
 				read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.entities), IndexField(j1))), Entity.name) != read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.entities), IndexField(j2))), Entity.name)
 			));
   // relship names are unique in schema
-  requires (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$ERSchema ==> 
+  requires (forall r: ref :: { dtype(r) <: ER$ERSchema } r!=null && read($srcHeap, r, alloc) && dtype(r) == ER$ERSchema ==> 
 			( forall j1,j2: int :: 0<=j1 && j1<j2 && j2<_System.array.Length(read($srcHeap, r, ERSchema.relships))  ==>
 				$Unbox(read($srcHeap, read($srcHeap, r, ERSchema.relships), IndexField(j1))): ref != $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.relships), IndexField(j2))): ref ==>
 				read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.relships), IndexField(j1))), Relship.name) != read($srcHeap, $Unbox(read($srcHeap, read($srcHeap, r, ERSchema.relships), IndexField(j2))), Relship.name)

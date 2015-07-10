@@ -63,84 +63,75 @@ implementation T2TA_matchAllTest () returns ()
       free invariant $HeapSucc(old($tarHeap), $tarHeap);
       free invariant $HeapSucc(old($linkHeap), $linkHeap);
 	{ 
-		stk := Seq#Build(stk, $Box(Seq#Index(obj#4, $i)));
-		call stk, t1 := OpCode#Store(stk);
-		call stk := OpCode#Load(stk, t1);
-		assert Seq#Length(stk) >= 1;
-		assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
-		assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
-		assert dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))) <: HSM$Transition;
-		stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$source): Field (ref))));	
-		call stk := OpCode#Push(stk, _CompositeState);
-		call stk := OpCode#Push(stk, _HSM);
-		call stk := OpCode#Findme(stk);
-		call stk := OCLAny#IsTypeof(stk);		
-		call stk := OCLAny#Not(stk);	
-		call stk := OpCode#Load(stk, t1);
-		assert Seq#Length(stk) >= 1;
-		assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
-		assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
-		assert dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))) <: HSM$Transition;
-		stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$target): Field (ref))));	
-		call stk := OpCode#Push(stk, _CompositeState);
-		call stk := OpCode#Push(stk, _HSM);
-		call stk := OpCode#Findme(stk);
-		call stk := OCLAny#IsTypeof(stk);
-		call stk := OCLAny#Not(stk);	
-		call stk := OCLAny#And(stk);
-		call stk := OCL#Boolean#Not(stk);
-		cond#23 := $Unbox(Seq#Index(stk, Seq#Length(stk)-1));
-		call stk := OpCode#Pop(stk);
-		goto label_24, label_44;
-		label_24:
-			assume !cond#23;
-			call stk := OpCode#GetASM(stk);
-			assert Seq#Length(stk) >= 1;
-			assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
-			assert read($linkHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
-			assert dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))) <: System.reserved;
-			stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($linkHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$links): Field (Set ref))));
-			call stk := OpCode#Push(stk, _TransientLink);
-			call stk := OpCode#Push(stk, _#native);
-			assert Seq#Length(stk) >= 2;
-			havoc obj#28;
-			assume obj#28!= null && !read($linkHeap, obj#28, alloc) && dtype(obj#28) == classifierTable[($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String),($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): String)];
-			$linkHeap := update($linkHeap, obj#28, alloc, true);
-			assume $IsGoodHeap($linkHeap);
-			assume $HeapSucc(old($linkHeap), $linkHeap);
-			stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(obj#28));
+stk := Seq#Build(stk, $Box(Seq#Index(obj#4, $i)));
+call stk, t1 := OpCode#Store(stk);
+call stk := OpCode#Load(stk, t1);
+assert Seq#Length(stk) >= 1;
+assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
+assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$source): Field (ref))));
+call stk := OpCode#Push(stk, _CompositeState);
+call stk := OpCode#Push(stk, _HSM);
+call stk := OpCode#Findme(stk);
+call stk := OCLAny#IsTypeof(stk);
+call stk := OCLAny#Not(stk);
+call stk := OpCode#Load(stk, t1);
+assert Seq#Length(stk) >= 1;
+assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
+assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$target): Field (ref))));
+call stk := OpCode#Push(stk, _CompositeState);
+call stk := OpCode#Push(stk, _HSM);
+assert ($Unbox(Seq#Index(stk, Seq#Length(stk)-2))) == _CompositeState;
+call stk := OpCode#Findme(stk);
+call stk := OCLAny#IsTypeof(stk);
+call stk := OCLAny#Not(stk);
+call stk := OCLAny#And(stk);
+call stk := OCL#Boolean#Not(stk);
+cond#23 := $Unbox(Seq#Index(stk, Seq#Length(stk)-1));
+call stk := OpCode#Pop(stk);
+if(cond#23){goto label_44;}
+label_24:
+call stk := OpCode#GetASM(stk);
+assert Seq#Length(stk) >= 1;
+assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
+assert read($linkHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($linkHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$links): Field (Set ref))));
+call stk := OpCode#Push(stk, _TransientLink);
+call stk := OpCode#Push(stk, _#native);
+assert Seq#Length(stk) >= 2;
+havoc obj#28;
+assume obj#28!= null && !read($linkHeap, obj#28, alloc) && dtype(obj#28) == classifierTable[($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String),($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): String)];
+$linkHeap := update($linkHeap, obj#28, alloc, true);
+assume $IsGoodHeap($linkHeap);
+assume $HeapSucc(old($linkHeap), $linkHeap);
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(obj#28));
 
-			call stk := OpCode#Dup(stk);
-			call stk := OpCode#Push(stk, _T2TA);
-			call stk := NTransientLink#setRule(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
-			call stk := OpCode#Dup(stk);
-			call stk := OpCode#Push(stk, _t1);
-			call stk := OpCode#Load(stk, t1);
-			call stk := NTransientLink#addSourceElement(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-3)),$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
-			call stk := OpCode#Dup(stk);
-			call stk := OpCode#Push(stk, _t2);
-			call stk := OpCode#Push(stk, _Transition);
-			call stk := OpCode#Push(stk, _FSM);
-			assert Seq#Length(stk) >= 2;
-			havoc obj#40;
-			assume obj#40!= null && !read($tarHeap, obj#40, alloc) && dtype(obj#40) == classifierTable[($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String),($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): String)];
-			$tarHeap := update($tarHeap, obj#40, alloc, true);
-			assume $IsGoodHeap($tarHeap);
-			assume $HeapSucc(old($tarHeap), $tarHeap);
-			assume getTarsBySrcs(Seq#Singleton(t1)) == obj#40;
-			stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(obj#40));
+call stk := OpCode#Dup(stk);
+call stk := OpCode#Push(stk, _T2TA);
+call stk := NTransientLink#setRule(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
+call stk := OpCode#Dup(stk);
+call stk := OpCode#Push(stk, _t1);
+call stk := OpCode#Load(stk, t1);
+call stk := NTransientLink#addSourceElement(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-3)),$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
+call stk := OpCode#Dup(stk);
+call stk := OpCode#Push(stk, _t2);
+call stk := OpCode#Push(stk, _Transition);
+call stk := OpCode#Push(stk, _FSM);
+assert Seq#Length(stk) >= 2;
+havoc obj#40;
+assume obj#40!= null && !read($tarHeap, obj#40, alloc) && dtype(obj#40) == classifierTable[($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String),($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): String)];
+$tarHeap := update($tarHeap, obj#40, alloc, true);
+assume $IsGoodHeap($tarHeap);
+assume $HeapSucc(old($tarHeap), $tarHeap);
+assume getTarsBySrcs(Seq#Singleton(t1)) == obj#40;
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(obj#40));
 
-
-			
-			call stk := NTransientLink#addTargetElement(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-3)),$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
-			call stk := OpCode#Pusht(stk);
-			stk := Seq#Take(stk, Seq#Length(stk)-3);
-			goto label_end;
-		label_44:
-			assume cond#23;
-			goto label_end;
-		label_end:
-			$i := $i+1;
+call stk := NTransientLink#addTargetElement(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-3)),$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
+call stk := OpCode#Pusht(stk);
+stk := Seq#Take(stk, Seq#Length(stk)-3);
+label_44:
+$i := $i+1;
 	}
 
 }

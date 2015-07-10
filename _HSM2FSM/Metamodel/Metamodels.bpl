@@ -192,13 +192,23 @@ const unique _Field$stateMachine: NameFamily;
 const unique _Field$compositeState: NameFamily;
 const unique _Field$source: NameFamily;
 const unique _Field$target: NameFamily;
+const unique _Field$label: NameFamily;
 
   axiom (FieldOfDecl(HSM$StateMachine, _Field$name) == HSM$StateMachine.name);
   axiom (FieldOfDecl(HSM$Transition, _Field$source) == HSM$Transition.source);
   axiom (FieldOfDecl(HSM$Transition, _Field$target) == HSM$Transition.target);
+  axiom (FieldOfDecl(HSM$Transition, _Field$label) == HSM$Transition.label);
+  axiom (FieldOfDecl(HSM$Transition, _Field$stateMachine) == HSM$Transition.stateMachine); 
+  axiom (FieldOfDecl(HSM$InitialState, _Field$compositeState) == HSM$AbstractState.compositeState);
+  axiom (FieldOfDecl(HSM$RegularState, _Field$compositeState) == HSM$AbstractState.compositeState);
+  axiom (FieldOfDecl(HSM$CompositeState, _Field$compositeState) == HSM$AbstractState.compositeState);
+
   
+
   
   axiom (FieldOfDecl(FSM$StateMachine, _Field$name) == FSM$StateMachine.name);
   axiom (FieldOfDecl(FSM$Transition, _Field$source) == FSM$Transition.source);
   axiom (FieldOfDecl(FSM$Transition, _Field$target) == FSM$Transition.target); 
-  
+  axiom (FieldOfDecl(FSM$Transition, _Field$label) == FSM$Transition.label); 
+  axiom (FieldOfDecl(FSM$Transition, _Field$stateMachine) == FSM$Transition.stateMachine); 
+  axiom (FieldOfDecl(FSM$InitialState, _Field$compositeState) == FSM$AbstractState.compositeState);
