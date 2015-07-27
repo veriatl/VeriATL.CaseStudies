@@ -74,7 +74,18 @@ function String#Concate(src:String,surfix:String): String;
 // OCL: Sequence - Generic Iterators, 
 // see 'testLibOCL.bpl' for example of its application
 // ---------------------------------------------------------------
-
+function Iterator#One<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): bool;
+	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: { Iterator#One(s,h,f) } 
+		Iterator#One(s,h,f) <==> Seq#Length(Iterator#Select(0,Seq#Length(s)-1,s,h,f)) == 1);
+		
+function Iterator#Any<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): T;
+	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: 
+		Iterator#Any(s,h,f) == null <==> 
+			(forall i: int :: 0<=i && i<Seq#Length(s) ==> !f[Seq#Index(s,i),h]));
+	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: 
+		Iterator#Any(s,h,f) != null <==> 
+			f[Iterator#Any(s,h,f),h] && Seq#Contains(s, Iterator#Any(s,h,f)));
+			
 function Iterator#Collect<T,R>(s: Seq T, h: HeapType, f:[T,HeapType]R): Seq R;
 	axiom (forall<T,R> s: Seq T, h: HeapType, f:[T,HeapType]R :: { Iterator#Collect(s,h,f) } 
 		Seq#Length(s) == Seq#Length(Iterator#Collect(s,h,f))); 
