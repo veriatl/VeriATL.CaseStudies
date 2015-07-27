@@ -73,6 +73,7 @@ function String#Concate(src:String,surfix:String): String;
 // ---------------------------------------------------------------
 // OCL: Sequence - Generic Iterators, 
 // see 'testLibOCL.bpl' for example of its application
+// TODO: consider refactoring
 // ---------------------------------------------------------------
 function Iterator#One<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): bool;
 	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: { Iterator#One(s,h,f) } 
