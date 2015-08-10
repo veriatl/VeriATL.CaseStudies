@@ -20,7 +20,11 @@ type String = Seq Char;
 type Char = int;
 
 
+function String#Size(String): int;
+  axiom (forall s: String :: Seq#Length(s) == String#Size(s));
 
+function String#Concate(src:String,surfix:String): String;
+  axiom (forall src, surfix: String :: Seq#Equal(String#Concate(src, surfix), Seq#Append(src, surfix)));
 
 
 function String#ToUpper(String): String;
@@ -65,11 +69,37 @@ function String#Substring(s: String, lower: int, upper: int): String;
 
 
 
+// ---------------------------------------------------------------
+// OCL: Set Extension
+// ---------------------------------------------------------------
+  
 
-function String#ToInteger(String, int, int): int;
-function String#Concate(src:String,surfix:String): String;
+function Set#DifferenceOne<T>(Set T, T): Set T;
+//TODO: Double check
+  axiom (forall<T> a: Set T, x: T, o: T :: { Set#DifferenceOne(a,x)[o] }
+    Set#DifferenceOne(a,x)[o] <==> o!=x && a[o]);	
+  axiom (forall<T> a: Set T, x: T :: { Set#DifferenceOne(a, x) }
+    !Set#DifferenceOne(a, x)[x]);
+
+function Set#Includes<T>(Set T, T): bool;  
+  axiom (forall<T> a: Set T, x: T :: { Set#Includes(a, x) }
+    Set#Includes(a, x) <==> a[x]);
+  
+function Set#Excludes<T>(Set T, T): bool;
+  axiom (forall<T> a: Set T, x: T :: { Set#Excludes(a, x) }
+    Set#Excludes(a, x) <==> !a[x]);
+  
+function Set#isEmpty<T>(Set T, T): bool;
+  axiom (forall<T> a: Set T, x: T :: { Set#isEmpty(a, x) }
+    Set#isEmpty(a, x) <==> (Set#Equal(a, Set#Empty())));
+  
+function Set#notEmpty<T>(Set T, T): bool;  
+  axiom (forall<T> a: Set T, x: T :: { Set#notEmpty(a, x) }
+    Set#notEmpty(a, x) <==> (!Set#Equal(a, Set#Empty())));
 
 
+  
+  
 // ---------------------------------------------------------------
 // OCL: Sequence - Generic Iterators, 
 // see 'testLibOCL.bpl' for example of its application
