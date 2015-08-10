@@ -172,7 +172,32 @@ function Seq#notEmpty<T>(Seq T, T): bool;
 // ---------------------------------------------------------------
 // OCL: OrderedSet
 // ---------------------------------------------------------------
-
+function OrderedSet#Append<T>(Seq T, T): Seq T;  
+  axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Append(a, x) }
+    Seq#Contains(a, x) ==>
+      Seq#Equal(OrderedSet#Append(a, x), a)); 
+  axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Append(a, x) }
+    !Seq#Contains(a, x) ==>
+      Seq#Equal(OrderedSet#Append(a, x), Seq#Build(a, x))); 
+	  
+function OrderedSet#Prepend<T>(Seq T, T): Seq T;  
+  axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Prepend(a, x) }
+    Seq#Contains(a, x) ==>
+      Seq#Equal(OrderedSet#Prepend(a, x), a)); 
+  axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Prepend(a, x) }
+    !Seq#Contains(a, x) ==>
+      Seq#Equal(OrderedSet#Prepend(a, x), Seq#Append(Seq#Singleton(x), a))); 
+	  
+function OrderedSet#insertAt<T>(Seq T, int, T): Seq T;  
+  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#insertAt(a, n, x) }
+    Seq#Contains(a, x) ==>
+      Seq#Equal(OrderedSet#insertAt(a,n,x), a)); 
+  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#insertAt(a, n, x) }
+    !Seq#Contains(a, x) && n<Seq#Length(a) ==>
+      Seq#Equal(OrderedSet#insertAt(a,n,x), Seq#Append(Seq#Build(Seq#Take(a,n),x), Seq#Drop(a,n)))); 
+  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#insertAt(a, n, x) }
+    !Seq#Contains(a, x) && n==Seq#Length(a)==>
+      Seq#Equal(OrderedSet#insertAt(a,n,x), Seq#Build(a, x)));
   
 // ---------------------------------------------------------------
 // OCL: Sequence - Generic Iterators, 
