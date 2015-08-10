@@ -101,7 +101,7 @@ function Set#notEmpty<T>(Set T, T): bool;
 // OCL: Bag Extension
 // ---------------------------------------------------------------
 
-function MultiSet#DifferenceOne<T>(Set T, T): Set T;
+function MultiSet#DifferenceOne<T>(MultiSet T, T): MultiSet T;
 // pure containment axiom 
 axiom (forall<T> a: MultiSet T, x: T, o: T :: { MultiSet#DifferenceOne(a,x)[o] }
   0 < MultiSet#DifferenceOne(a,x)[o] <==> o != x && 0 < a[o]);
@@ -133,16 +133,16 @@ function MultiSet#notEmpty<T>(MultiSet T, T): bool;
 // OCL: Seq Extension
 // ---------------------------------------------------------------
 
-function Seq#Prepend<T>(Seq T, T): bool;  
+function Seq#Prepend<T>(Seq T, T): Seq T;  
   axiom (forall<T> a: Seq T, x: T :: { Seq#Prepend(a, x) }
     Seq#Equal(Seq#Prepend(a, x), Seq#Append(Seq#Singleton(x), a))); 
 	
 function Seq#First<T>(Seq T): T;  
-  axiom (forall<T> a: Seq T :: { Seq#First(a, x) }
+  axiom (forall<T> a: Seq T :: { Seq#First(a) }
   a != Seq#Empty() ==> (Seq#First(a) == Seq#Index(a,0)) ); 
   
 function Seq#Last<T>(Seq T): T;  
-  axiom (forall<T> a: Seq T :: { Seq#Last(a, x) }
+  axiom (forall<T> a: Seq T :: { Seq#Last(a) }
   a != Seq#Empty() ==> (Seq#Last(a) == Seq#Index(a,Seq#Length(a)-1)) );   
   
 function Seq#insertAt<T>(Seq T, int, T): Seq T;
@@ -168,6 +168,10 @@ function Seq#isEmpty<T>(Seq T, T): bool;
 function Seq#notEmpty<T>(Seq T, T): bool;  
   axiom (forall<T> a: Seq T, x: T :: { Seq#notEmpty(a, x) }
     Seq#notEmpty(a, x) <==> (!Seq#Equal(a, Seq#Empty()))); 
+
+// ---------------------------------------------------------------
+// OCL: OrderedSet
+// ---------------------------------------------------------------
 
   
 // ---------------------------------------------------------------
