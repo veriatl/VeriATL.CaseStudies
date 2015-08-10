@@ -129,6 +129,46 @@ function MultiSet#notEmpty<T>(MultiSet T, T): bool;
   axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#notEmpty(a, x) }
     MultiSet#notEmpty(a, x) <==> (!MultiSet#Equal(a, MultiSet#Empty())));  
   
+// ---------------------------------------------------------------
+// OCL: Seq Extension
+// ---------------------------------------------------------------
+
+function Seq#Prepend<T>(Seq T, T): bool;  
+  axiom (forall<T> a: Seq T, x: T :: { Seq#Prepend(a, x) }
+    Seq#Equal(Seq#Prepend(a, x), Seq#Append(Seq#Singleton(x), a))); 
+	
+function Seq#First<T>(Seq T): T;  
+  axiom (forall<T> a: Seq T :: { Seq#First(a, x) }
+  a != Seq#Empty() ==> (Seq#First(a) == Seq#Index(a,0)) ); 
+  
+function Seq#Last<T>(Seq T): T;  
+  axiom (forall<T> a: Seq T :: { Seq#Last(a, x) }
+  a != Seq#Empty() ==> (Seq#Last(a) == Seq#Index(a,Seq#Length(a)-1)) );   
+  
+function Seq#insertAt<T>(Seq T, int, T): Seq T;
+  axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#insertAt(a, n, x) }
+    n<Seq#Length(a) ==> 
+	  Seq#Equal(Seq#insertAt(a, n, x), Seq#Append(Seq#Build(Seq#Take(a,n),x), Seq#Drop(a,n))));
+  axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#insertAt(a, n, x) }
+    n==Seq#Length(a) ==> 
+	  Seq#Equal(Seq#insertAt(a, n, x), Seq#Build(a, x))); 	  
+  
+function Seq#subSequence<T>(Seq T, int, int): Seq T;
+  axiom (forall<T> a: Seq T, lo: int, hi: int :: { Seq#subSequence(a, lo, hi) }
+    Seq#Equal(Seq#subSequence(a,lo,hi), Seq#Drop(Seq#Take(a,hi),lo))); 
+  
+function Seq#NotContains<T>(Seq T, T): bool;
+  axiom (forall<T> a: Seq T, x: T :: { Seq#NotContains(a, x) }
+    Seq#NotContains(a, x) <==> !Seq#Contains(a,x));
+  
+function Seq#isEmpty<T>(Seq T, T): bool;
+  axiom (forall<T> a: Seq T, x: T :: { Seq#isEmpty(a, x) }
+    Seq#isEmpty(a, x) <==> (Seq#Equal(a, Seq#Empty())));
+  
+function Seq#notEmpty<T>(Seq T, T): bool;  
+  axiom (forall<T> a: Seq T, x: T :: { Seq#notEmpty(a, x) }
+    Seq#notEmpty(a, x) <==> (!Seq#Equal(a, Seq#Empty()))); 
+
   
 // ---------------------------------------------------------------
 // OCL: Sequence - Generic Iterators, 
@@ -453,10 +493,6 @@ procedure OCL#Seq#Prepend<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
 	Seq#Append(Seq#Singleton(e), s1)
   ))); 
-  
-// as it is implemented, the same as the Seq#Append.
-procedure OCL#Seq#Including<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
-
 
 
 procedure OCL#Seq#AsSeq<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
@@ -484,9 +520,8 @@ procedure OCL#Seq#Last<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq Box
 	Seq#Index(s1,Seq#Length(s1)-1)
   ))); 
   
-procedure OCL#Seq#indexOf<T>(stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
-procedure OCL#Seq#Excluding<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
-procedure OCL#Seq#Flatten<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+
+
 
 // ---------------------------------------------------------------
 // -- OCL: Bag, 2 operations                 ---------------------
