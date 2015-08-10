@@ -97,7 +97,37 @@ function Set#notEmpty<T>(Set T, T): bool;
   axiom (forall<T> a: Set T, x: T :: { Set#notEmpty(a, x) }
     Set#notEmpty(a, x) <==> (!Set#Equal(a, Set#Empty())));
 
+// ---------------------------------------------------------------
+// OCL: Bag Extension
+// ---------------------------------------------------------------
 
+function MultiSet#DifferenceOne<T>(Set T, T): Set T;
+// pure containment axiom 
+axiom (forall<T> a: MultiSet T, x: T, o: T :: { MultiSet#DifferenceOne(a,x)[o] }
+  0 < MultiSet#DifferenceOne(a,x)[o] <==> o != x && 0 < a[o]);
+// del-ing decreases count by one
+axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#DifferenceOne(a, x) }
+  a[x] > 0 ==> MultiSet#DifferenceOne(a, x)[x] == a[x] - 1);
+// other elements unchanged
+axiom (forall<T> a: MultiSet T, x: T, y: T :: { MultiSet#DifferenceOne(a, x), a[y] }
+  x != y ==> a[y] == MultiSet#DifferenceOne(a, x)[y]);
+  
+  
+function MultiSet#Includes<T>(MultiSet T, T): bool;  
+  axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#Includes(a, x) }
+    MultiSet#Includes(a, x) <==> (a[x]>0));
+  
+function MultiSet#Excludes<T>(MultiSet T, T): bool;
+  axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#Excludes(a, x) }
+    MultiSet#Excludes(a, x) <==> (a[x]==0));
+  
+function MultiSet#isEmpty<T>(MultiSet T, T): bool;
+  axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#isEmpty(a, x) }
+    MultiSet#isEmpty(a, x) <==> (MultiSet#Equal(a, MultiSet#Empty())));
+  
+function MultiSet#notEmpty<T>(MultiSet T, T): bool;  
+  axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#notEmpty(a, x) }
+    MultiSet#notEmpty(a, x) <==> (!MultiSet#Equal(a, MultiSet#Empty())));  
   
   
 // ---------------------------------------------------------------
