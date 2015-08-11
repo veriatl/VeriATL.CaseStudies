@@ -203,6 +203,7 @@ function Seq#NotEmpty<T>(Seq T): bool;
 // ---------------------------------------------------------------
 // OCL: OrderedSet
 // ---------------------------------------------------------------
+// returns a new ordered set with the element $o$ append to $s$, if $o$ is not in $s$.
 function OrderedSet#Append<T>(Seq T, T): Seq T;  
   axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Append(a, x) }
     Seq#Contains(a, x) ==>
@@ -210,7 +211,8 @@ function OrderedSet#Append<T>(Seq T, T): Seq T;
   axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Append(a, x) }
     !Seq#Contains(a, x) ==>
       Seq#Equal(OrderedSet#Append(a, x), Seq#Build(a, x))); 
-	  
+
+// returns a new ordered set with the element $o$ prepend to $s$, if $o$ is not in $s$.	  
 function OrderedSet#Prepend<T>(Seq T, T): Seq T;  
   axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Prepend(a, x) }
     Seq#Contains(a, x) ==>
@@ -218,7 +220,8 @@ function OrderedSet#Prepend<T>(Seq T, T): Seq T;
   axiom (forall<T> a: Seq T, x: T :: { OrderedSet#Prepend(a, x) }
     !Seq#Contains(a, x) ==>
       Seq#Equal(OrderedSet#Prepend(a, x), Seq#Append(Seq#Singleton(x), a))); 
-	  
+
+// returns a new ordered set with the element $o$ added at index $n$ of $s$, if $o$ is not in $s$.	  
 function OrderedSet#InsertAt<T>(Seq T, int, T): Seq T;  
   axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#InsertAt(a, n, x) }
     Seq#Contains(a, x) ==>
