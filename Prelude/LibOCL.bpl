@@ -1,3 +1,8 @@
+// -- DafnyPrelude Extension for OCL
+// -- AUTHOR: ZHENG CHENG
+// -- DATE: 2015
+
+
 // ---------------------------------------------------------------
 // Axiom of FieldOfDecl, 
 // ---------------------------------------------------------------
@@ -20,19 +25,13 @@ type String = Seq Char;
 type Char = int;
 
 
-function String#Size(String): int;
-  axiom (forall s: String :: Seq#Length(s) == String#Size(s));
-
-function String#Concate(src:String,surfix:String): String;
-  axiom (forall src, surfix: String :: Seq#Equal(String#Concate(src, surfix), Seq#Append(src, surfix)));
-
 
 function String#ToUpper(String): String;
   axiom (forall s: String :: { Seq#Length(String#ToUpper(s)) }
 	Seq#Length(String#ToUpper(s)) == Seq#Length(s));
   axiom (forall s: String, i: int :: { Seq#Index(String#ToUpper(s),i) }
 	(0 <= i && i < Seq#Length(s) ==> 
-		((97 <= Seq#Index(s,i) && Seq#Index(s,i) <= 122 ==> Seq#Index(s,i) == Seq#Index(String#ToUpper(s),i) + 22) &&
+		((97 <= Seq#Index(s,i) && Seq#Index(s,i) <= 122 ==> Seq#Index(s,i) == Seq#Index(String#ToUpper(s),i) + 32) &&
 		 (97 > Seq#Index(s,i) || Seq#Index(s,i) > 122 ==> Seq#Index(s,i) == Seq#Index(String#ToUpper(s),i))) 
 	) 
   );
@@ -42,22 +41,22 @@ function String#ToLower(String): String;
 	Seq#Length(String#ToLower(s)) == Seq#Length(s));
   axiom (forall s: String, i: int :: { Seq#Index(String#ToLower(s),i) }
 	(0 <= i && i < Seq#Length(s) ==> 
-		((65 <= Seq#Index(s,i) && Seq#Index(s,i) <= 90 ==> Seq#Index(s,i) == Seq#Index(String#ToLower(s),i) - 22) &&
+		((65 <= Seq#Index(s,i) && Seq#Index(s,i) <= 90 ==> Seq#Index(s,i) == Seq#Index(String#ToLower(s),i) - 32) &&
 		 (65 > Seq#Index(s,i) || Seq#Index(s,i) > 90 ==> Seq#Index(s,i) == Seq#Index(String#ToLower(s),i))) 
 	) 
   );
 
 
-function String#StartWith(src: String, prefix: String): bool;
-  axiom (forall s: String, pf: String :: { String#StartWith(s,pf) }
-	String#StartWith(s,pf) <==> 
+function String#StartsWith(src: String, prefix: String): bool;
+  axiom (forall s: String, pf: String :: { String#StartsWith(s,pf) }
+	String#StartsWith(s,pf) <==> 
 		(forall i: int :: { Seq#Index(s,i) } { Seq#Index(pf,i) }
 			0 <= i && i < Seq#Length(pf) ==> Seq#Index(s,i) == Seq#Index(pf,i))
   );
 
-function String#EndWith(src: String, surfix: String): bool;
-  axiom (forall s: String, sf: String :: { String#EndWith(s,sf) }
-	String#EndWith(s,sf) <==> 
+function String#EndsWith(src: String, surfix: String): bool;
+  axiom (forall s: String, sf: String :: { String#EndsWith(s,sf) }
+	String#EndsWith(s,sf) <==> 
 		(forall i: int :: { Seq#Index(s,i) } { Seq#Index(sf,i) }
 			0 <= i && i < Seq#Length(sf) ==> Seq#Index(s,i+Seq#Length(s)-Seq#Length(sf)) == Seq#Index(sf,i))
   );  
@@ -89,13 +88,13 @@ function Set#Excludes<T>(Set T, T): bool;
   axiom (forall<T> a: Set T, x: T :: { Set#Excludes(a, x) }
     Set#Excludes(a, x) <==> !a[x]);
   
-function Set#isEmpty<T>(Set T, T): bool;
-  axiom (forall<T> a: Set T, x: T :: { Set#isEmpty(a, x) }
-    Set#isEmpty(a, x) <==> (Set#Equal(a, Set#Empty())));
+function Set#IsEmpty<T>(Set T): bool;
+  axiom (forall<T> a: Set T :: { Set#IsEmpty(a) }
+    Set#IsEmpty(a) <==> (Set#Equal(a, Set#Empty())));
   
-function Set#notEmpty<T>(Set T, T): bool;  
-  axiom (forall<T> a: Set T, x: T :: { Set#notEmpty(a, x) }
-    Set#notEmpty(a, x) <==> (!Set#Equal(a, Set#Empty())));
+function Set#NotEmpty<T>(Set T): bool;  
+  axiom (forall<T> a: Set T :: { Set#NotEmpty(a) }
+    Set#NotEmpty(a) <==> (!Set#Equal(a, Set#Empty())));
 
 // ---------------------------------------------------------------
 // OCL: Bag Extension
@@ -121,13 +120,13 @@ function MultiSet#Excludes<T>(MultiSet T, T): bool;
   axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#Excludes(a, x) }
     MultiSet#Excludes(a, x) <==> (a[x]==0));
   
-function MultiSet#isEmpty<T>(MultiSet T, T): bool;
-  axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#isEmpty(a, x) }
-    MultiSet#isEmpty(a, x) <==> (MultiSet#Equal(a, MultiSet#Empty())));
+function MultiSet#IsEmpty<T>(MultiSet T): bool;
+  axiom (forall<T> a: MultiSet T :: { MultiSet#IsEmpty(a) }
+    MultiSet#IsEmpty(a) <==> (MultiSet#Equal(a, MultiSet#Empty())));
   
-function MultiSet#notEmpty<T>(MultiSet T, T): bool;  
-  axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#notEmpty(a, x) }
-    MultiSet#notEmpty(a, x) <==> (!MultiSet#Equal(a, MultiSet#Empty())));  
+function MultiSet#NotEmpty<T>(MultiSet T): bool;  
+  axiom (forall<T> a: MultiSet T :: { MultiSet#NotEmpty(a) }
+    MultiSet#NotEmpty(a) <==> (!MultiSet#Equal(a, MultiSet#Empty())));  
   
 // ---------------------------------------------------------------
 // OCL: Seq Extension
@@ -145,29 +144,29 @@ function Seq#Last<T>(Seq T): T;
   axiom (forall<T> a: Seq T :: { Seq#Last(a) }
   a != Seq#Empty() ==> (Seq#Last(a) == Seq#Index(a,Seq#Length(a)-1)) );   
   
-function Seq#insertAt<T>(Seq T, int, T): Seq T;
-  axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#insertAt(a, n, x) }
+function Seq#InsertAt<T>(Seq T, int, T): Seq T;
+  axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#InsertAt(a, n, x) }
     n<Seq#Length(a) ==> 
-	  Seq#Equal(Seq#insertAt(a, n, x), Seq#Append(Seq#Build(Seq#Take(a,n),x), Seq#Drop(a,n))));
-  axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#insertAt(a, n, x) }
+	  Seq#Equal(Seq#InsertAt(a, n, x), Seq#Append(Seq#Build(Seq#Take(a,n),x), Seq#Drop(a,n))));
+  axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#InsertAt(a, n, x) }
     n==Seq#Length(a) ==> 
-	  Seq#Equal(Seq#insertAt(a, n, x), Seq#Build(a, x))); 	  
+	  Seq#Equal(Seq#InsertAt(a, n, x), Seq#Build(a, x))); 	  
   
-function Seq#subSequence<T>(Seq T, int, int): Seq T;
-  axiom (forall<T> a: Seq T, lo: int, hi: int :: { Seq#subSequence(a, lo, hi) }
-    Seq#Equal(Seq#subSequence(a,lo,hi), Seq#Drop(Seq#Take(a,hi),lo))); 
+function Seq#Subsequence<T>(Seq T, int, int): Seq T;
+  axiom (forall<T> a: Seq T, lo: int, hi: int :: { Seq#Subsequence(a, lo, hi) }
+    Seq#Equal(Seq#Subsequence(a,lo,hi), Seq#Drop(Seq#Take(a,hi),lo))); 
   
 function Seq#NotContains<T>(Seq T, T): bool;
   axiom (forall<T> a: Seq T, x: T :: { Seq#NotContains(a, x) }
     Seq#NotContains(a, x) <==> !Seq#Contains(a,x));
   
-function Seq#isEmpty<T>(Seq T, T): bool;
-  axiom (forall<T> a: Seq T, x: T :: { Seq#isEmpty(a, x) }
-    Seq#isEmpty(a, x) <==> (Seq#Equal(a, Seq#Empty())));
+function Seq#IsEmpty<T>(Seq T): bool;
+  axiom (forall<T> a: Seq T:: { Seq#IsEmpty(a) }
+    Seq#IsEmpty(a) <==> (Seq#Equal(a, Seq#Empty())));
   
-function Seq#notEmpty<T>(Seq T, T): bool;  
-  axiom (forall<T> a: Seq T, x: T :: { Seq#notEmpty(a, x) }
-    Seq#notEmpty(a, x) <==> (!Seq#Equal(a, Seq#Empty()))); 
+function Seq#NotEmpty<T>(Seq T): bool;  
+  axiom (forall<T> a: Seq T :: { Seq#NotEmpty(a) }
+    Seq#NotEmpty(a) <==> (!Seq#Equal(a, Seq#Empty()))); 
 
 // ---------------------------------------------------------------
 // OCL: OrderedSet
@@ -188,16 +187,16 @@ function OrderedSet#Prepend<T>(Seq T, T): Seq T;
     !Seq#Contains(a, x) ==>
       Seq#Equal(OrderedSet#Prepend(a, x), Seq#Append(Seq#Singleton(x), a))); 
 	  
-function OrderedSet#insertAt<T>(Seq T, int, T): Seq T;  
-  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#insertAt(a, n, x) }
+function OrderedSet#InsertAt<T>(Seq T, int, T): Seq T;  
+  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#InsertAt(a, n, x) }
     Seq#Contains(a, x) ==>
-      Seq#Equal(OrderedSet#insertAt(a,n,x), a)); 
-  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#insertAt(a, n, x) }
+      Seq#Equal(OrderedSet#InsertAt(a,n,x), a)); 
+  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#InsertAt(a, n, x) }
     !Seq#Contains(a, x) && n<Seq#Length(a) ==>
-      Seq#Equal(OrderedSet#insertAt(a,n,x), Seq#Append(Seq#Build(Seq#Take(a,n),x), Seq#Drop(a,n)))); 
-  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#insertAt(a, n, x) }
+      Seq#Equal(OrderedSet#InsertAt(a,n,x), Seq#Append(Seq#Build(Seq#Take(a,n),x), Seq#Drop(a,n)))); 
+  axiom (forall<T> a: Seq T, n: int, x: T :: { OrderedSet#InsertAt(a, n, x) }
     !Seq#Contains(a, x) && n==Seq#Length(a)==>
-      Seq#Equal(OrderedSet#insertAt(a,n,x), Seq#Build(a, x)));
+      Seq#Equal(OrderedSet#InsertAt(a,n,x), Seq#Build(a, x)));
   
 // ---------------------------------------------------------------
 // OCL: Sequence - Generic Iterators, 
@@ -328,9 +327,17 @@ function Iterator#isUnique<T,R>(s: Seq T, h: HeapType, f:[T, HeapType]R): bool;
 
 
 // ---------------------------------------------------------------
-// -- OCL: Integer, X operations             ---------------------
+// -- OCL ASM Wrapper Starts
+// -- USED BY ASM2BOOGIE COMPILER
+// -- AUTHOR: ZHENG CHENG
 // ---------------------------------------------------------------
 
+	
+
+// ---------------------------------------------------------------
+// -- OCL: Any, 8 operations             ---------------------
+// ---------------------------------------------------------------
+// # todo: function of isundefined
 procedure OCLAny#IsUndefined(stk: Seq BoxType) returns (newStk: Seq BoxType);
   requires Seq#Length(stk)>=1;
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
@@ -338,23 +345,18 @@ procedure OCLAny#IsUndefined(stk: Seq BoxType) returns (newStk: Seq BoxType);
   )));
   
   
-procedure OCLAny#Not(stk: Seq BoxType) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk)>=1;
-  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
-	!($Unbox(Seq#Index(stk,Seq#Length(stk)-1)): bool)
-  )));
 
-procedure OCLAny#And(stk: Seq BoxType) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk)>=2;
-  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
-	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)): bool) &&
-	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)): bool)
-  )));
 
 procedure OCLAny#Equal<T>(stk: Seq BoxType,o1:T,o2:T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk)>=2;
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
 	o1 == o2
+  )));
+
+procedure OCLAny#NotEqual<T>(stk: Seq BoxType,o1:T,o2:T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	o1 != o2
   )));
   
 procedure OCLAny#IsTypeof(stk: Seq BoxType) returns (newStk: Seq BoxType);
@@ -368,6 +370,26 @@ procedure OCLAny#IsKindof(stk: Seq BoxType) returns (newStk: Seq BoxType);
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
 	dtype($Unbox(Seq#Index(stk,Seq#Length(stk)-2)): ref) <: $Unbox(Seq#Index(stk,Seq#Length(stk)-1)): ClassName
   )));  
+
+procedure OCLAny#Type(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	dtype($Unbox(Seq#Index(stk,Seq#Length(stk)-2)): ref)
+  )));  
+
+
+procedure OCLAny#Not(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	!($Unbox(Seq#Index(stk,Seq#Length(stk)-1)): bool)
+  )));
+
+procedure OCLAny#And(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)): bool) &&
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)): bool)
+  )));
   
 // ---------------------------------------------------------------
 // -- OCL: Boolean, 5 operations             ---------------------
@@ -406,12 +428,138 @@ procedure OCL#Boolean#Implies (stk: Seq BoxType) returns (newStk: Seq BoxType);
 	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):bool)
   ));  
 
+// ---------------------------------------------------------------
+// -- OCL: Integer, 11 operations             ---------------------
+// ---------------------------------------------------------------
 
 
+procedure OCL#Integer#LT (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) <
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  )); 
+
+
+procedure OCL#Integer#GT (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) >
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  )); 
+  
+procedure OCL#Integer#LE (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) <=
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  )); 
+
+procedure OCL#Integer#GE (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) >=
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  ));   
+  
+procedure OCL#Integer#EQ (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) ==
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  ));   
+
+procedure OCL#Integer#NEQ (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) !=
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  ));     
+   
+  
+procedure OCL#Integer#ADD (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) +
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  ));  
+  
+procedure OCL#Integer#SUB (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) -
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  ));  
+
+procedure OCL#Integer#MULTI (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) *
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  ));    
+
+procedure OCL#Integer#DIV (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) div
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  )); 
+  
+procedure OCL#Integer#MOD (stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-2)):int) mod
+	($Unbox(Seq#Index(stk,Seq#Length(stk)-1)):int)
+  )); 
+
 // ---------------------------------------------------------------
-// -- OCL: Set, 8 operations                 ---------------------
+// -- OCL: String, 7 operations             ---------------------
 // ---------------------------------------------------------------
-// need to mention T, so make the stack operand s1, s2 explicit
+procedure OCL#String#Size (stk: Seq BoxType, s1: String) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#Length(s1)
+  )); 
+
+procedure OCL#String#ToUpper (stk: Seq BoxType, s1: String) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	String#ToUpper(s1)
+  ));
+
+procedure OCL#String#ToLower (stk: Seq BoxType, s1: String) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	String#ToLower(s1)
+  ));
+  
+procedure OCL#String#Concat (stk: Seq BoxType, s1: String, s2: String) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#Append(s1, s2)
+  ));
+  
+procedure OCL#String#StartsWith (stk: Seq BoxType, s1: String, s2: String) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	String#StartsWith(s1, s2)
+  ));
+  
+procedure OCL#String#EndsWith (stk: Seq BoxType, s1: String, s2: String) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	String#EndsWith(s1, s2)
+  ));
+  
+procedure OCL#String#Substring (stk: Seq BoxType, s1: String, lo: int, hi: int) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 3;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-3), $Box(
+	String#Substring(s1,lo,hi)
+  ));
+  
+// ---------------------------------------------------------------
+// -- OCL: Set, 12 operations                 ---------------------
+// ---------------------------------------------------------------
 procedure OCL#Set#Union<T> (stk: Seq BoxType, s1: Set T, s2: Set T ) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
@@ -424,21 +572,50 @@ procedure OCL#Set#Intersection<T> (stk: Seq BoxType, s1: Set T, s2: Set T ) retu
 	Set#Intersection(s1, s2)
   ));  
 
+procedure OCL#Set#Difference<T> (stk: Seq BoxType, s1: Set T, s2: Set T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Set#Difference(s1, s2)
+  ));
+
+
 procedure OCL#Set#Including<T> (stk: Seq BoxType, s: Set T, e: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
 	Set#UnionOne(s, e)
   )); 
 
-procedure OCL#Set#Excluding<T> (stk: Seq BoxType, s1: Set T, s2: Set T) returns (newStk: Seq BoxType);
+procedure OCL#Set#Excluding<T> (stk: Seq BoxType, s: Set T, e: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
-	Set#Difference(s1, s2)
+	Set#DifferenceOne(s, e)
   )); 
 
-// todo: similar to excluding but the s2 can be any of the collection type, case analysis needed.  
-procedure OCL#Set#Difference<T, X> (stk: Seq BoxType, s1: Set T, s2: X) returns (newStk: Seq BoxType);
+procedure OCL#Set#Includes<T> (stk: Seq BoxType, s1: Set T, o: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Set#Includes(s1, o)
+  )); 
 
+procedure OCL#Set#Excludes<T> (stk: Seq BoxType, s1: Set T, o: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Set#Excludes(s1, o)
+  )); 
+  
+procedure OCL#Set#IsEmpty<T> (stk: Seq BoxType, s1: Set T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Set#IsEmpty(s1)
+  ));   
+  
+procedure OCL#Set#NotEmpty<T> (stk: Seq BoxType, s1: Set T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Set#NotEmpty(s1)
+  ));    
+  
+  
 procedure OCL#Set#SymetricDifference<T> (stk: Seq BoxType, s1: Set T, s2: Set T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
@@ -449,68 +626,142 @@ procedure OCL#Set#asSet<T> (stk: Seq BoxType, s1: Set T) returns (newStk: Seq Bo
   requires Seq#Length(stk) >= 1;
   ensures newStk == stk;
 
-// todo: turn the input set into a sequence, pop, then put the seq on top of the result stack.  
-procedure OCL#Set#asSeq<T> (stk: Seq BoxType, s1:Set T) returns (newStk: Seq BoxType);
+
  
+// ---------------------------------------------------------------
+// -- OCL: Bag, 7 operations                 ---------------------
+// ---------------------------------------------------------------
+
+procedure OCL#Bag#Including<T> (stk: Seq BoxType, b: MultiSet T, e: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	MultiSet#UnionOne(b, e)
+  )); 
+
+  
+procedure OCL#Bag#Excluding<T> (stk: Seq BoxType, b: MultiSet T, e: T) returns (newStk: Seq BoxType);  
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	MultiSet#DifferenceOne(b, e)
+  )); 
+
+procedure OCL#Bag#Includes<T> (stk: Seq BoxType, b: MultiSet T, e: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	MultiSet#Includes(b, e)
+  )); 
+  
+procedure OCL#Bag#Excludes<T> (stk: Seq BoxType, b: MultiSet T, e: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	MultiSet#Excludes(b, e)
+  )); 
+
+procedure OCL#Bag#IsEmpty<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	MultiSet#IsEmpty(b)
+  )); 
+  
+procedure OCL#Bag#NotEmpty<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	MultiSet#NotEmpty(b)
+  )); 
+
+
+procedure OCL#Bag#AsBag<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 1;
+  ensures newStk == stk;
+  
+
 
 // ---------------------------------------------------------------
-// -- OCL: OrderSet, 3 operations            ---------------------
-// ---------------------------------------------------------------
+// -- OCL: OrderSet, 12 operations            ---------------------
 // OrderSet are modelled as Sequence.
-// except the 3 operations defined below, other operations are the same as defined on Seq.
-procedure OCL#OrderSet#Append<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
+// ---------------------------------------------------------------
+
+procedure OCL#OrderedSet#Append<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
-  ensures Seq#Contains(s1, e) ==> (newStk == Seq#Take(stk, Seq#Length(stk)-1)); // contained e, pop e out of stk. 
-  ensures !Seq#Contains(s1, e) ==> (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
-	Seq#Build(s1, e)
-  ))); 
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	OrderedSet#Append(s1,e)
+  )));
   
-procedure OCL#OrderSet#Prepend<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
+procedure OCL#OrderedSet#Prepend<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
-  ensures Seq#Contains(s1, e) ==> (newStk == Seq#Take(stk, Seq#Length(stk)-1)); // contained e, pop e out of stk. 
-  ensures !Seq#Contains(s1, e) ==> (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
-	Seq#Append(Seq#Singleton(e), s1)
-  ))); 
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	OrderedSet#Prepend(s1,e)
+  )));
 
 
 // insert e(-1) into rank n(-2) of s1(-3).  
-procedure OCL#OrderSet#InsertAt<T> (stk: Seq BoxType, s1: Seq T, n: int, e: T) returns (newStk: Seq BoxType);
+procedure OCL#OrderedSet#InsertAt<T> (stk: Seq BoxType, s1: Seq T, n: int, e: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 3;
   requires n <= Seq#Length(s1);
-  ensures Seq#Contains(s1, e) ==> (newStk == Seq#Take(stk, Seq#Length(stk)-2)); // contained e, pop e out of stk. 
-  ensures (!Seq#Contains(s1, e) && n<Seq#Length(s1) )==> (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-3), $Box(
-	Seq#Append(Seq#Build(Seq#Take(s1,n),e), Seq#Drop(s1,n))
-  ))); 
-  ensures (!Seq#Contains(s1, e) && n==Seq#Length(s1) )==> (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-3), $Box(
-	Seq#Build(s1, e)
-  ))); 
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	OrderedSet#InsertAt(s1,n,e)
+  )));
   
-// ---------------------------------------------------------------
-// -- OCL: Sequence, 10 operations           ---------------------
-// ---------------------------------------------------------------
-procedure OCL#Seq#InsertAt<T> (stk: Seq BoxType, s1: Seq T, n: int, e: T) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 3;
-  requires n <= Seq#Length(s1);
-  ensures ( n<Seq#Length(s1) )==> (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-3), $Box(
-	Seq#Append(Seq#Build(Seq#Take(s1,n),e), Seq#Drop(s1,n))
-  ))); 
-  ensures ( n==Seq#Length(s1) )==> (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-3), $Box(
-	Seq#Build(s1, e)
-  ))); 
-
-procedure OCL#Seq#At<T> (stk: Seq BoxType, s1: Seq T, n: int) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 2;
-  ensures ( n<Seq#Length(s1) )==> (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
-	Seq#Index(s1,n)
-  ))); 
-  
-procedure OCL#Seq#SubSequence<T> (stk: Seq BoxType, s1: Seq T, lo: int, hi: int) returns (newStk: Seq BoxType);
+procedure OCL#OrderedSet#Suborderedset<T> (stk: Seq BoxType, s1: Seq T, lo: int, hi: int) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 3;
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-3), $Box(
-	Seq#Drop(Seq#Take(s1,hi),lo)
+	Seq#Subsequence(s1,lo,hi)
   )));   
+  
+procedure OCL#OrderedSet#At<T> (stk: Seq BoxType, s1: Seq T, n: int) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#Index(s1,n)))); 
+  
+procedure OCL#OrderedSet#First<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  requires s1!=Seq#Empty();
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#First(s1)))); 
 
+procedure OCL#OrderedSet#Last<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  requires s1!=Seq#Empty();
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#Last(s1))));   
+  
+procedure OCL#OrderedSet#Size<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#Length(s1))));     
+  
+  
+procedure OCL#OrderedSet#Includes<T> (stk: Seq BoxType, s1: Seq T, n: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#Contains(s1,n))));   
+	
+procedure OCL#OrderedSet#Excludes<T> (stk: Seq BoxType, s1: Seq T, n: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#NotContains(s1,n))));  
+  
+procedure OCL#OrderedSet#IsEmpty<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#IsEmpty(s1))));    
 
+procedure OCL#OrderedSet#NotEmpty<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#NotEmpty(s1))));  	
+  
+  
+  
+// ---------------------------------------------------------------
+// -- OCL: Sequence, 13 operations           ---------------------
+// ---------------------------------------------------------------
+procedure OCL#Seq#Union<T> (stk: Seq BoxType, s1: Seq T, s2: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#Append(s1, s2)
+  ))); 
+  
 procedure OCL#Seq#Append<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
@@ -520,52 +771,75 @@ procedure OCL#Seq#Append<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk:
 procedure OCL#Seq#Prepend<T> (stk: Seq BoxType, s1: Seq T, e: T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
-	Seq#Append(Seq#Singleton(e), s1)
+	Seq#Prepend(s1, e)
   ))); 
 
-
-procedure OCL#Seq#AsSeq<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 1;
-  ensures newStk == stk;
-
-// acutally, s2 can be any of the collection type, case analysis needed here  
-procedure OCL#Seq#Union<T> (stk: Seq BoxType, s1: Seq T, s2: Seq T) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk)>=2;
+ 
+procedure OCL#Seq#InsertAt<T> (stk: Seq BoxType, s1: Seq T, n: int, e: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 3;
+  requires n <= Seq#Length(s1);
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
-	Seq#Append(s1, s2)
+	Seq#InsertAt(s1,n,e)
+  )));
+
+procedure OCL#Seq#Subsequence<T> (stk: Seq BoxType, s1: Seq T, lo: int, hi: int) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 3;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-3), $Box(
+	Seq#Subsequence(s1,lo,hi)
+  )));  
+  
+procedure OCL#Seq#At<T> (stk: Seq BoxType, s1: Seq T, n: int) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  requires n<Seq#Length(s1);
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#Index(s1,n)
   ))); 
 
 procedure OCL#Seq#First<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk)>=1;
   requires s1!=Seq#Empty();
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
-	Seq#Index(s1,0)
+	Seq#First(s1)
   ))); 
 
 procedure OCL#Seq#Last<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk)>=1;
   requires s1!=Seq#Empty();
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
-	Seq#Index(s1,Seq#Length(s1)-1)
+	Seq#Last(s1)
   ))); 
   
+procedure OCL#Seq#Size<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#Length(s1))));     
+  
+  
+procedure OCL#Seq#Includes<T> (stk: Seq BoxType, s1: Seq T, n: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#Contains(s1,n))));   
+	
+procedure OCL#Seq#Excludes<T> (stk: Seq BoxType, s1: Seq T, n: T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) >= 2;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(
+	Seq#NotContains(s1,n))));  
+  
+procedure OCL#Seq#IsEmpty<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#IsEmpty(s1))));    
 
-
-
-// ---------------------------------------------------------------
-// -- OCL: Bag, 2 operations                 ---------------------
-// ---------------------------------------------------------------
-procedure OCL#Bag#AsBag<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Seq BoxType);
+procedure OCL#Seq#NotEmpty<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk)>=1;
+  ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
+	Seq#NotEmpty(s1))));  	
+	
+procedure OCL#Seq#AsSeq<T> (stk: Seq BoxType, s1: Seq T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 1;
-  ensures newStk == stk;
-
-procedure OCL#Bag#Including<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Seq BoxType);
-
+  ensures newStk == stk;    
 
   
-procedure OCL#Bag#Excluding<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Seq BoxType);  
 
 
-  
-procedure OCL#Bag#Flatten<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Seq BoxType);  
 
