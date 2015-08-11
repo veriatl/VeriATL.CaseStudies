@@ -119,31 +119,34 @@ function Set#NotEmpty<T>(Set T): bool;
 // ---------------------------------------------------------------
 // OCL: Bag Extension
 // ---------------------------------------------------------------
-
+// return a new bag that as same as $s$ except the occurrence $o$ decreased by 1.
 function MultiSet#DifferenceOne<T>(MultiSet T, T): MultiSet T;
 // pure containment axiom 
 axiom (forall<T> a: MultiSet T, x: T, o: T :: { MultiSet#DifferenceOne(a,x)[o] }
   0 < MultiSet#DifferenceOne(a,x)[o] <==> o != x && 0 < a[o]);
-// del-ing decreases count by one
+// deleting from bag decreases count by one
 axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#DifferenceOne(a, x) }
   a[x] > 0 ==> MultiSet#DifferenceOne(a, x)[x] == a[x] - 1);
 // other elements unchanged
 axiom (forall<T> a: MultiSet T, x: T, y: T :: { MultiSet#DifferenceOne(a, x), a[y] }
   x != y ==> a[y] == MultiSet#DifferenceOne(a, x)[y]);
   
-  
+// returns whether the object $o$ is included in/from $s$.
 function MultiSet#Includes<T>(MultiSet T, T): bool;  
   axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#Includes(a, x) }
     MultiSet#Includes(a, x) <==> (a[x]>0));
-  
+
+// returns whether the object $o$ is excluded in/from $s$.	
 function MultiSet#Excludes<T>(MultiSet T, T): bool;
   axiom (forall<T> a: MultiSet T, x: T :: { MultiSet#Excludes(a, x) }
     MultiSet#Excludes(a, x) <==> (a[x]==0));
-  
+
+// returns whether $s$ is empty. 	
 function MultiSet#IsEmpty<T>(MultiSet T): bool;
   axiom (forall<T> a: MultiSet T :: { MultiSet#IsEmpty(a) }
     MultiSet#IsEmpty(a) <==> (MultiSet#Equal(a, MultiSet#Empty())));
-  
+
+// returns whether $s$ is not empty. 	
 function MultiSet#NotEmpty<T>(MultiSet T): bool;  
   axiom (forall<T> a: MultiSet T :: { MultiSet#NotEmpty(a) }
     MultiSet#NotEmpty(a) <==> (!MultiSet#Equal(a, MultiSet#Empty())));  
@@ -151,19 +154,24 @@ function MultiSet#NotEmpty<T>(MultiSet T): bool;
 // ---------------------------------------------------------------
 // OCL: Seq Extension
 // ---------------------------------------------------------------
-
+// returns a new sequence with the element $o$ prepended to $s$
 function Seq#Prepend<T>(Seq T, T): Seq T;  
   axiom (forall<T> a: Seq T, x: T :: { Seq#Prepend(a, x) }
     Seq#Equal(Seq#Prepend(a, x), Seq#Append(Seq#Singleton(x), a))); 
-	
+
+// returns the first element of $s$ (OCLUndefined if $s$ is empty).
+// TODO: cases when a == Seq#Empty() 	
 function Seq#First<T>(Seq T): T;  
   axiom (forall<T> a: Seq T :: { Seq#First(a) }
   a != Seq#Empty() ==> (Seq#First(a) == Seq#Index(a,0)) ); 
-  
+
+// returns the last element of $s$ (OCLUndefined if $s$ is empty).
+// TODO: cases when a == Seq#Empty()   
 function Seq#Last<T>(Seq T): T;  
   axiom (forall<T> a: Seq T :: { Seq#Last(a) }
   a != Seq#Empty() ==> (Seq#Last(a) == Seq#Index(a,Seq#Length(a)-1)) );   
-  
+
+// returns a new sequence with the element $o$ added at index $n$ of $s$.  
 function Seq#InsertAt<T>(Seq T, int, T): Seq T;
   axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#InsertAt(a, n, x) }
     n<Seq#Length(a) ==> 
@@ -171,19 +179,23 @@ function Seq#InsertAt<T>(Seq T, int, T): Seq T;
   axiom (forall<T> a: Seq T, n: int, x: T :: { Seq#InsertAt(a, n, x) }
     n==Seq#Length(a) ==> 
 	  Seq#Equal(Seq#InsertAt(a, n, x), Seq#Build(a, x))); 	  
-  
+
+// returns $s$ starting from the element indexed by $lower$ to the element indexed by $upper$.	  
 function Seq#Subsequence<T>(Seq T, int, int): Seq T;
   axiom (forall<T> a: Seq T, lo: int, hi: int :: { Seq#Subsequence(a, lo, hi) }
     Seq#Equal(Seq#Subsequence(a,lo,hi), Seq#Drop(Seq#Take(a,hi),lo))); 
-  
+
+// returns whether the object $o$ is excluded in/from $s$	
 function Seq#NotContains<T>(Seq T, T): bool;
   axiom (forall<T> a: Seq T, x: T :: { Seq#NotContains(a, x) }
     Seq#NotContains(a, x) <==> !Seq#Contains(a,x));
-  
+
+// returns whether $s$ is empty.	
 function Seq#IsEmpty<T>(Seq T): bool;
   axiom (forall<T> a: Seq T:: { Seq#IsEmpty(a) }
     Seq#IsEmpty(a) <==> (Seq#Equal(a, Seq#Empty())));
-  
+
+// returns whether $s$ is not empty.	
 function Seq#NotEmpty<T>(Seq T): bool;  
   axiom (forall<T> a: Seq T :: { Seq#NotEmpty(a) }
     Seq#NotEmpty(a) <==> (!Seq#Equal(a, Seq#Empty()))); 
@@ -355,7 +367,7 @@ function Iterator#isUnique<T,R>(s: Seq T, h: HeapType, f:[T, HeapType]R): bool;
 	
 
 // ---------------------------------------------------------------
-// -- OCL: Any, 8 operations             ---------------------
+// -- OCL Wrapper: Any, 8 operations             ---------------------
 // ---------------------------------------------------------------
 // # todo: isUndefined for ref only at the moment
 procedure OCLAny#IsUndefined(stk: Seq BoxType) returns (newStk: Seq BoxType);
@@ -412,7 +424,7 @@ procedure OCLAny#And(stk: Seq BoxType) returns (newStk: Seq BoxType);
   )));
   
 // ---------------------------------------------------------------
-// -- OCL: Boolean, 5 operations             ---------------------
+// -- OCL Wrapper: Boolean, 5 operations             ---------------------
 // ---------------------------------------------------------------
 
 
@@ -449,7 +461,7 @@ procedure OCL#Boolean#Implies (stk: Seq BoxType) returns (newStk: Seq BoxType);
   ));  
 
 // ---------------------------------------------------------------
-// -- OCL: Integer, 11 operations             ---------------------
+// -- OCL Wrapper: Integer, 11 operations             ---------------------
 // ---------------------------------------------------------------
 
 
@@ -533,7 +545,7 @@ procedure OCL#Integer#MOD (stk: Seq BoxType) returns (newStk: Seq BoxType);
   )); 
 
 // ---------------------------------------------------------------
-// -- OCL: String, 7 operations             ---------------------
+// -- OCL Wrapper: String, 7 operations             ---------------------
 // ---------------------------------------------------------------
 procedure OCL#String#Size (stk: Seq BoxType, s1: String) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 1;
@@ -578,7 +590,7 @@ procedure OCL#String#Substring (stk: Seq BoxType, s1: String, lo: int, hi: int) 
   ));
   
 // ---------------------------------------------------------------
-// -- OCL: Set, 12 operations                 ---------------------
+// -- OCL Wrapper: Set, 12 operations                 ---------------------
 // ---------------------------------------------------------------
 procedure OCL#Set#Union<T> (stk: Seq BoxType, s1: Set T, s2: Set T ) returns (newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2;
@@ -649,7 +661,7 @@ procedure OCL#Set#asSet<T> (stk: Seq BoxType, s1: Set T) returns (newStk: Seq Bo
 
  
 // ---------------------------------------------------------------
-// -- OCL: Bag, 7 operations                 ---------------------
+// -- OCL Wrapper: Bag, 7 operations                 ---------------------
 // ---------------------------------------------------------------
 
 procedure OCL#Bag#Including<T> (stk: Seq BoxType, b: MultiSet T, e: T) returns (newStk: Seq BoxType);
@@ -697,7 +709,7 @@ procedure OCL#Bag#AsBag<T> (stk: Seq BoxType, b: MultiSet T) returns (newStk: Se
 
 
 // ---------------------------------------------------------------
-// -- OCL: OrderSet, 12 operations            ---------------------
+// -- OCL Wrapper: OrderSet, 12 operations            ---------------------
 // OrderSet are modelled as Sequence.
 // ---------------------------------------------------------------
 
@@ -774,7 +786,7 @@ procedure OCL#OrderedSet#NotEmpty<T> (stk: Seq BoxType, s1: Seq T) returns (newS
   
   
 // ---------------------------------------------------------------
-// -- OCL: Sequence, 13 operations           ---------------------
+// -- OCL Wrapper: Sequence, 13 operations           ---------------------
 // ---------------------------------------------------------------
 procedure OCL#Seq#Union<T> (stk: Seq BoxType, s1: Seq T, s2: Seq T) returns (newStk: Seq BoxType);
   requires Seq#Length(stk)>=2;
