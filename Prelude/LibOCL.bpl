@@ -238,10 +238,12 @@ function OrderedSet#InsertAt<T>(Seq T, int, T): Seq T;
 // see 'testLibOCL.bpl' for example of its application
 // TODO: consider refactoring
 // ---------------------------------------------------------------
+// returns a boolean value stating whether there is exactly one element of the source collection for which body evaluates to true;
 function Iterator#One<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): bool;
 	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: { Iterator#One(s,h,f) } 
 		Iterator#One(s,h,f) <==> Seq#Length(Iterator#Select(0,Seq#Length(s)-1,s,h,f)) == 1);
-		
+
+// returns one element of the source collection for which body evaluates to true. If body never evaluates to true, the operation returns null;		
 function Iterator#Any<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): T;
 	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: 
 		Iterator#Any(s,h,f) == null <==> 
@@ -249,14 +251,47 @@ function Iterator#Any<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): T;
 	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: 
 		Iterator#Any(s,h,f) != null <==> 
 			f[Iterator#Any(s,h,f),h] && Seq#Contains(s, Iterator#Any(s,h,f)));
-			
+
+// returns the subset of the source collection for which body evaluates to true;	
+function Iterator#Select<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool): Seq T;
+	// forward induction axiom, when filter expression evaluates to true.
+	axiom (forall<T> lo: int, hi: int, s: Seq T, h:HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
+		lo<hi && f[Seq#Index(s,lo), h] ==>
+		Iterator#Select(lo,hi,s,h,f) == Seq#Append(Seq#Singleton(Seq#Index(s,lo)),Iterator#Select(lo+1,hi,s,h,f))	
+	);
+	// forward induction axiom, when filter expression evaluates to false.
+	axiom (forall<T> lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
+		lo<hi && !f[Seq#Index(s,lo), h] ==>
+		Iterator#Select(lo,hi,s,h,f) == Iterator#Select(lo+1,hi,s,h,f)
+	);
+    // backward induction axiom, when filter expression evaluates to true.
+	axiom (forall<T> lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
+		lo<hi && f[Seq#Index(s,hi-1), h]==>
+		Iterator#Select(lo,hi,s,h,f) == Seq#Append(Iterator#Select(lo,hi-1,s,h,f), Seq#Singleton(Seq#Index(s,hi-1)))
+	); 
+	// backward induction axiom, when filter expression evaluates to false.
+	axiom (forall<T> lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
+		lo<hi && !f[Seq#Index(s,hi-1), h] ==>
+		Iterator#Select(lo,hi,s,h,f) == Iterator#Select(lo,hi-1,s,h,f)
+	);
+	// splitting axiom
+	axiom (forall<T> mid:int, lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,mid,s,h,f), Iterator#Select(lo,hi,s,h,f)} {Iterator#Select(lo,mid,s,h,f), Iterator#Select(mid,hi,s,h,f)}
+		lo<=mid && mid<=hi ==>
+		Iterator#Select(lo,hi,s,h,f) == Seq#Append(Iterator#Select(lo,mid,s,h,f),Iterator#Select(mid,hi,s,h,f))
+	);
+	// consequence axiom
+	axiom (forall<T> i:int, lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Seq#Index(Iterator#Select(lo,hi,s,h,f),i)}
+		0<=i && i<Seq#Length(Iterator#Select(lo,hi,s,h,f)) ==> f[Seq#Index(Iterator#Select(lo,hi,s,h,f),i), h]
+	);
+
+// returns a collection of elements which results in applying body to each element of the source collection;			
 function Iterator#Collect<T,R>(s: Seq T, h: HeapType, f:[T,HeapType]R): Seq R;
 	axiom (forall<T,R> s: Seq T, h: HeapType, f:[T,HeapType]R :: { Iterator#Collect(s,h,f) } 
 		Seq#Length(s) == Seq#Length(Iterator#Collect(s,h,f))); 
 	axiom (forall<T,R> s: Seq T, h: HeapType, f:[T,HeapType]R, i: int :: {Seq#Index(Iterator#Collect(s,h,f),i)}
 		0<=i && i<Seq#Length(s) ==> f[Seq#Index(s,i),h] == Seq#Index(Iterator#Collect(s,h,f),i));
 
-
+// returns the subset of the source collection for which body evaluates to false
 function Iterator#Reject<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T,HeapType]bool): Seq T;
 	axiom (forall<T> lo: int, hi: int, s: Seq T, h:HeapType, f:[T, HeapType]bool :: {Iterator#Reject(lo,hi,s,h,f)}
 		lo<hi && !f[Seq#Index(s,lo), h] ==>
@@ -282,33 +317,9 @@ function Iterator#Reject<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T,HeapTy
 		0<=i && i<Seq#Length(Iterator#Reject(lo,hi,s,h,f)) ==> !f[Seq#Index(Iterator#Reject(lo,hi,s,h,f),i), h]
 	);
 	
-	
-function Iterator#Select<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool): Seq T;
-	axiom (forall<T> lo: int, hi: int, s: Seq T, h:HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
-		lo<hi && f[Seq#Index(s,lo), h] ==>
-		Iterator#Select(lo,hi,s,h,f) == Seq#Append(Seq#Singleton(Seq#Index(s,lo)),Iterator#Select(lo+1,hi,s,h,f))	
-	);
-	axiom (forall<T> lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
-		lo<hi && !f[Seq#Index(s,lo), h] ==>
-		Iterator#Select(lo,hi,s,h,f) == Iterator#Select(lo+1,hi,s,h,f)
-	);
-    axiom (forall<T> lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
-		lo<hi && f[Seq#Index(s,hi-1), h]==>
-		Iterator#Select(lo,hi,s,h,f) == Seq#Append(Iterator#Select(lo,hi-1,s,h,f), Seq#Singleton(Seq#Index(s,hi-1)))
-	); 
-	axiom (forall<T> lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,hi,s,h,f)}
-		lo<hi && !f[Seq#Index(s,hi-1), h] ==>
-		Iterator#Select(lo,hi,s,h,f) == Iterator#Select(lo,hi-1,s,h,f)
-	);
-	axiom (forall<T> mid:int, lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Iterator#Select(lo,mid,s,h,f), Iterator#Select(lo,hi,s,h,f)} {Iterator#Select(lo,mid,s,h,f), Iterator#Select(mid,hi,s,h,f)}
-		lo<=mid && mid<=hi ==>
-		Iterator#Select(lo,hi,s,h,f) == Seq#Append(Iterator#Select(lo,mid,s,h,f),Iterator#Select(mid,hi,s,h,f))
-	);
-	axiom (forall<T> i:int, lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool :: {Seq#Index(Iterator#Select(lo,hi,s,h,f),i)}
-		0<=i && i<Seq#Length(Iterator#Select(lo,hi,s,h,f)) ==> f[Seq#Index(Iterator#Select(lo,hi,s,h,f),i), h]
-	);
 
-	
+
+// returns a boolean value stating whether body evaluates to true for all elements of the source collection;	
 function Iterator#Forall<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool): bool;
 	axiom (forall<T> lo: int, hi: int, s: Seq T, h:HeapType, f:[T, HeapType]bool :: {Iterator#Forall(lo,hi,s,h,f)}
 		lo<hi && f[Seq#Index(s,lo), h] ==>
@@ -330,7 +341,8 @@ function Iterator#Forall<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapT
 		lo<=mid && mid<=hi ==>
 		(Iterator#Forall(lo,hi,s,h,f) <==> (Iterator#Forall(lo,mid,s,h,f) && Iterator#Forall(mid,hi,s,h,f)))
 	);
-	
+
+// returns a boolean value stating whether body evaluates to true for at least one element of the source collection;	
 function Iterator#Exists<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapType]bool): bool;
 	axiom (forall<T> lo: int, hi: int, s: Seq T, h:HeapType, f:[T, HeapType]bool :: {Iterator#Exists(lo,hi,s,h,f)}
 		lo<hi && f[Seq#Index(s,lo), h] ==>
