@@ -6,26 +6,39 @@
 // ---------------------------------------------------------------
 // Axiom of FieldOfDecl, 
 // ---------------------------------------------------------------
-
+// the commented expression is not true for type system with inheritance.
 axiom (forall<T> cl : ClassName, nm: NameFamily :: 
    {FieldOfDecl(cl, nm): Field T}
    /*DeclType(FieldOfDecl(cl, nm): Field T) == cl && */ 
    DeclName(FieldOfDecl(cl, nm): Field T) == nm);
 
    
+// ---------------------------------------------------------------
+// OCL: Any 
+// ---------------------------------------------------------------
+// check the value of input is undefined or not. 
+// Notice: String is tricky based on its modelling of sequence of integer, so it is always defined. 
+// A direct outcome is VeriATL forces value of string to be defined on models, i.e. set to empty string by default.
+function Any#IsUndefined<T>(T): bool;
+  axiom (forall i: int :: !Any#IsUndefined(i) );
+  axiom (forall b: bool :: !Any#IsUndefined(b) );
+  axiom (forall s: String :: !Any#IsUndefined(s) );
+  axiom (forall r: ref :: Any#IsUndefined(r) <==> (r==null) );
+
+
 
    
 // ---------------------------------------------------------------
 // OCL: String 
-// We assume each string is a sequence of int.
-// each charactor has a integer representation (ASCII), e.g. 'A' = 65, 'a' = 97
+// We model each string as a sequence of int.
+// each character has a integer representation (ASCII), e.g. 'A' = 65, 'a' = 97
 // ---------------------------------------------------------------
 
 type String = Seq Char;
 type Char = int;
 
 
-
+// return an upper case copy of input
 function String#ToUpper(String): String;
   axiom (forall s: String :: { Seq#Length(String#ToUpper(s)) }
 	Seq#Length(String#ToUpper(s)) == Seq#Length(s));
@@ -35,7 +48,8 @@ function String#ToUpper(String): String;
 		 (97 > Seq#Index(s,i) || Seq#Index(s,i) > 122 ==> Seq#Index(s,i) == Seq#Index(String#ToUpper(s),i))) 
 	) 
   );
-  
+
+// return an lower case copy of input  
 function String#ToLower(String): String;
   axiom (forall s: String :: { Seq#Length(String#ToLower(s)) }
 	Seq#Length(String#ToLower(s)) == Seq#Length(s));
@@ -46,7 +60,7 @@ function String#ToLower(String): String;
 	) 
   );
 
-
+// return a boolean value stating whether src starts with prefix.
 function String#StartsWith(src: String, prefix: String): bool;
   axiom (forall s: String, pf: String :: { String#StartsWith(s,pf) }
 	String#StartsWith(s,pf) <==> 
@@ -54,13 +68,15 @@ function String#StartsWith(src: String, prefix: String): bool;
 			0 <= i && i < Seq#Length(pf) ==> Seq#Index(s,i) == Seq#Index(pf,i))
   );
 
-function String#EndsWith(src: String, surfix: String): bool;
+// return a boolean value stating whether src ends with suffix.  
+function String#EndsWith(src: String, suffix: String): bool;
   axiom (forall s: String, sf: String :: { String#EndsWith(s,sf) }
 	String#EndsWith(s,sf) <==> 
 		(forall i: int :: { Seq#Index(s,i) } { Seq#Index(sf,i) }
 			0 <= i && i < Seq#Length(sf) ==> Seq#Index(s,i+Seq#Length(s)-Seq#Length(sf)) == Seq#Index(sf,i))
   );  
 
+// returns the substring of $s$ starting from the character indexed by $lower$ to the character indexed by $upper$. 
 function String#Substring(s: String, lower: int, upper: int): String;
   axiom (forall s: String, l: int, u: int ::
 	String#Substring(s,l,u) == Seq#Drop(Seq#Take(s,u),l)
@@ -72,7 +88,7 @@ function String#Substring(s: String, lower: int, upper: int): String;
 // OCL: Set Extension
 // ---------------------------------------------------------------
   
-
+// returns difference of two sets
 function Set#DifferenceOne<T>(Set T, T): Set T;
 //TODO: Double check
   axiom (forall<T> a: Set T, x: T, o: T :: { Set#DifferenceOne(a,x)[o] }
@@ -80,18 +96,22 @@ function Set#DifferenceOne<T>(Set T, T): Set T;
   axiom (forall<T> a: Set T, x: T :: { Set#DifferenceOne(a, x) }
     !Set#DifferenceOne(a, x)[x]);
 
+// returns whether the object $o$ is included in $s$.
 function Set#Includes<T>(Set T, T): bool;  
   axiom (forall<T> a: Set T, x: T :: { Set#Includes(a, x) }
     Set#Includes(a, x) <==> a[x]);
-  
+
+// returns whether the object $o$ is excluded from $s$.
 function Set#Excludes<T>(Set T, T): bool;
   axiom (forall<T> a: Set T, x: T :: { Set#Excludes(a, x) }
     Set#Excludes(a, x) <==> !a[x]);
-  
+
+// returns whether $s$ is empty.	
 function Set#IsEmpty<T>(Set T): bool;
   axiom (forall<T> a: Set T :: { Set#IsEmpty(a) }
     Set#IsEmpty(a) <==> (Set#Equal(a, Set#Empty())));
-  
+
+// returns whether $s$ is not empty.
 function Set#NotEmpty<T>(Set T): bool;  
   axiom (forall<T> a: Set T :: { Set#NotEmpty(a) }
     Set#NotEmpty(a) <==> (!Set#Equal(a, Set#Empty())));
@@ -337,11 +357,11 @@ function Iterator#isUnique<T,R>(s: Seq T, h: HeapType, f:[T, HeapType]R): bool;
 // ---------------------------------------------------------------
 // -- OCL: Any, 8 operations             ---------------------
 // ---------------------------------------------------------------
-// # todo: function of isundefined
+// # todo: isUndefined for ref only at the moment
 procedure OCLAny#IsUndefined(stk: Seq BoxType) returns (newStk: Seq BoxType);
   requires Seq#Length(stk)>=1;
   ensures (newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(
-	$Unbox(Seq#Index(stk,Seq#Length(stk)-1)) == null
+	$Unbox(Seq#Index(stk,Seq#Length(stk)-1)): ref == null
   )));
   
   
