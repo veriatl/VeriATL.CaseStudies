@@ -1,4 +1,4 @@
-Regression Tests start at: 2015/07/02 12:40:28
+Regression Tests start at: 2015/08/12 16:51:09
  ========================================================================= 
 Folder: ../_HSM2FSM/
   /ATL_Correctness/
@@ -30,4 +30,3 @@ Folder: ../_HSM2FSM/
 	checking T2TB_matchAll.bpl [pass]
 	checking T2TC_applyAll.bpl [pass]
 	checking T2TC_matchAll.bpl [pass]
-<<< Process finished. (Exit code 0)

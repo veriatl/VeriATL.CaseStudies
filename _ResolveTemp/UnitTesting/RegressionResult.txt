@@ -1,5 +1,5 @@
-Regression Tests start at: 2015/07/02 12:51:09
- ========================================================================= 
-Folder: ../_ResolveTemp/
+Regression Tests start at: 2015/08/12 16:51:09
+=========================================================================
+ Folder: ../_ResolveTemp/
   /ATL_Correctness/
 	checking test.bpl [pass]
