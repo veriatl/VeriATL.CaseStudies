@@ -1,6 +1,13 @@
-Regression Tests start at: 2015/02/13 16:49:55
+Regression Tests start at: 2015/08/12 16:49:15
  ========================================================================= 
-Folder: ../ATL_Rule_Encoding/
+Folder: ../_ER2REL/
+  /ATL_Correctness/
+	checking ER2REL_Correctness_post1.bpl [pass]
+	checking ER2REL_Correctness_post2.bpl [pass]
+	checking ER2REL_Correctness_post3.bpl [pass]
+	checking ER2REL_Correctness_post4.bpl [pass]
+	checking Optimization_Validation.bpl [pass]
+  /ATL_Rule_Encoding/
 	checking Apply_E2R.bpl [pass]
 	checking Apply_EA2A.bpl [pass]
 	checking Apply_R2R.bpl [pass]
@@ -13,10 +20,3 @@ Folder: ../ATL_Rule_Encoding/
 	checking MATCH_RA2A.bpl [pass]
 	checking MATCH_RA2AK.bpl [pass]
 	checking MATCH_S2S.bpl [pass]
-Folder: ../ATL_Correctness/
-	checking ER2REL_Correctness_post1.bpl [pass]
-	checking ER2REL_Correctness_post2.bpl [pass]
-	checking ER2REL_Correctness_post3.bpl [pass]
-	checking ER2REL_Correctness_post4.bpl [pass]
-	checking Optimization_Validation.bpl [pass]
-<<< Process finished. (Exit code 0)

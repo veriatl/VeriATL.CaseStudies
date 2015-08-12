@@ -22,7 +22,7 @@ Projs = [Proj2]
 
 # WHAT OPTION TO VERIFY EACH PROJ
 Projs_option_map = { Proj1: {_OPT_VALIDATION}, 
-                     Proj2: {_OPT_VALIDATION},    
+                     Proj2: {_OPT_VALIDATION,_OPT_VERIFICATION},    
                      Proj3: {_OPT_VERIFICATION}    }
 
 # BOOGIE ARGS
@@ -46,10 +46,10 @@ def forgeRunningCommand(projPath, taskName, option):
 	
 	if option ==_OPT_VERIFICATION :
 		command.append(projPath+"ExecutionSemantics/ATLRules.whole.bpl")
-		command.append(projPathf+"ATL_Correctness/"+taskName)
+		command.append(projPath+"ATL_Correctness/"+taskName)
 	elif option == _OPT_VALIDATION :
 		command.append(projPath+"ATL_Rule_Encoding/"+taskName)	# input
-	print command
+
 	return command
 
 # Helper to generate Oracle
