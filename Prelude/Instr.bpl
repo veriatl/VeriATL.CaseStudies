@@ -25,10 +25,12 @@ procedure OpCode#Pusht(stk: Seq BoxType) returns (newStk: Seq BoxType);
   
 //Instr: pop 
 procedure OpCode#Pop(stk: Seq BoxType) returns (newStk: Seq BoxType);
+  requires Seq#Length(stk) > 0;
   ensures newStk == Seq#Take(stk, Seq#Length(stk)-1);
   
 //Instr: store
 procedure OpCode#Store<T>(stk: Seq BoxType) returns(newStk: Seq BoxType, topVal: T);
+  requires Seq#Length(stk) > 0;
   ensures newStk == Seq#Take(stk, Seq#Length(stk)-1);
   ensures topVal == $Unbox(Seq#Index(stk, Seq#Length(stk)-1));
   
@@ -38,17 +40,17 @@ procedure OpCode#Load<T>(stk: Seq BoxType, v: T) returns (newStk: Seq BoxType);
  
 //Instr: Swap
 procedure OpCode#Swap(stk: Seq BoxType) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 2;
+  requires Seq#Length(stk) > 1;
   ensures newStk == Seq#Build(Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), Seq#Index(stk, Seq#Length(stk)-1)), Seq#Index(stk, Seq#Length(stk)-2));
  
 //Instr: Dup
 procedure OpCode#Dup(stk: Seq BoxType) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 1;
+  requires Seq#Length(stk) > 0;
   ensures newStk == Seq#Build(stk, Seq#Index(stk, Seq#Length(stk)-1));
  
 //Instr: Dup_x1
 procedure OpCode#DupX1(stk: Seq BoxType) returns (newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 2;
+  requires Seq#Length(stk) > 1;
   ensures newStk == Seq#Build(Seq#Build(Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), Seq#Index(stk, Seq#Length(stk)-1)), Seq#Index(stk, Seq#Length(stk)-2)), Seq#Index(stk, Seq#Length(stk)-1));
 
   
@@ -104,7 +106,7 @@ if(isCollection(FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _p
    
 // Instr: findme
 procedure OpCode#Findme(stk: Seq BoxType) returns(newStk: Seq BoxType);
-  requires Seq#Length(stk) >= 2;
+  requires Seq#Length(stk) > 1;
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), 
 							  $Box(classifierTable[($Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String), 
 												   ($Unbox(Seq#Index(stk, Seq#Length(stk)-2)): String)]));

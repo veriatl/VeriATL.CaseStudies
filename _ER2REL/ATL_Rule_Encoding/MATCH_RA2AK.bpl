@@ -109,7 +109,7 @@ call stk := OpCode#Load(stk, att);
 assert Seq#Length(stk) >= 1;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
 assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
-stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$entity): Field (ref))));
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),ERAttribute.entity)));
 call stk := OpCode#Load(stk, rse);
 assert Seq#Length(stk) >= 1;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
