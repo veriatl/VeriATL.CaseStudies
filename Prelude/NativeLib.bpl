@@ -116,27 +116,35 @@ returns
 	newStk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#target])[key]));
 }
 
+// TODO: refactoring, heap is not used as a parameter.
 procedure ASM#Resolve<alpha>(stk: Seq BoxType, heap: HeapType, e: alpha) returns (newStk: Seq BoxType);
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) == Asm;
   ensures newStk == Seq#Build(
 	Seq#Take(stk, Seq#Length(stk)-2), 
-	ASM#Resolve#Sem($Unbox(Seq#Index(stk, Seq#Length(stk)-2)), heap, e)
+	ASM#Resolve#Sem($Unbox(Seq#Index(stk, Seq#Length(stk)-2)), $srcHeap, $tarHeap, e)
 	);
 
-function ASM#Resolve#Sem<alpha>(this: ref, heap: HeapType, elem: alpha) : BoxType;
-	axiom (forall this:ref, heap: HeapType, elem: String ::
-		ASM#Resolve#Sem(this, heap, elem) == $Box(elem)
+function ASM#Resolve#Sem<alpha>(this: ref, iHeap: HeapType, oHeap: HeapType, elem: alpha) : BoxType;
+	axiom (forall this:ref, iHeap, oHeap: HeapType, elem: String ::
+		ASM#Resolve#Sem(this, iHeap, oHeap, elem) == $Box(elem)
 	);
-	axiom (forall this:ref, heap: HeapType, elem: bool ::
-		ASM#Resolve#Sem(this, heap, elem) == $Box(elem)
+	axiom (forall this:ref, iHeap, oHeap: HeapType, elem: bool ::
+		ASM#Resolve#Sem(this, iHeap, oHeap, elem) == $Box(elem)
 	);	
-	axiom (forall this:ref, heap: HeapType, elem: int ::
-		ASM#Resolve#Sem(this, heap, elem) == $Box(elem)
+	axiom (forall this:ref, iHeap, oHeap: HeapType, elem: int ::
+		ASM#Resolve#Sem(this, iHeap, oHeap, elem) == $Box(elem)
 	);
-	axiom (forall this:ref, heap: HeapType, elem: ref ::
+	axiom (forall this:ref, iHeap, oHeap: HeapType, elem: ref ::
 		dtype(elem) != class._System.array ==>
-		ASM#Resolve#Sem(this, heap, elem) == $Box(getTarsBySrcs(Seq#Singleton(elem)))
+		ASM#Resolve#Sem(this, iHeap, oHeap, elem) == $Box(getTarsBySrcs(Seq#Singleton(elem)))
 	);
+	axiom (forall this:ref, iHeap, oHeap: HeapType, elem: ref ::
+		dtype(elem) == class._System.array ==>
+		  _System.array.Length($Unbox(ASM#Resolve#Sem(this, iHeap, oHeap, elem))) == _System.array.Length(elem) 
+		  && dtype($Unbox(ASM#Resolve#Sem(this, iHeap, oHeap, elem))) == class._System.array
+		  && ( forall __i: int :: 0<=__i && __i<_System.array.Length(elem) ==>
+              $Unbox(read(oHeap, $Unbox(ASM#Resolve#Sem(this, iHeap, oHeap, elem)), IndexField(__i))):ref == getTarsBySrcs(Seq#Singleton( $Unbox(read(iHeap, elem, IndexField(__i))): ref) )
+		  ));
 	
 function invisble#getLinkbySources(s: Set ref): ref;
   axiom (forall s1,s2 : Set ref :: !Set#Equal(s1,s2) ==> 

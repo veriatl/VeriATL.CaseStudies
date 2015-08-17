@@ -121,6 +121,8 @@ procedure S2S_apply(in: ref) returns()
   free requires dtype(Map#Elements($linkHeap[in, TransientLink#target])[_t]) == REL$RELSchema;
   free requires Map#Elements($linkHeap[in, TransientLink#target])[_t] != null;
   free requires getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])) == Map#Elements($linkHeap[in, TransientLink#target])[_t];
+  free requires dtype(read($srcHeap,  Map#Elements($linkHeap[in, TransientLink#source])[_s], ERSchema.entities)) == class._System.array;
+  free requires dtype(read($srcHeap,  Map#Elements($linkHeap[in, TransientLink#source])[_s], ERSchema.relships)) == class._System.array;
   free requires Seq#FromArray($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])), RELSchema.relations)) == Seq#Empty();
   modifies $tarHeap;
   // name <-
@@ -222,30 +224,19 @@ stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box($srcHeap[$Unbox(Seq#Inde
 
 call stk := ASM#Resolve(stk, $srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref);
 
-// $Unbox(Seq#Index(stk, Seq#Length(stk)-1))
-havoc $resolved;
-assume dtype($resolved) == class._System.array;
-assume _System.array.Length(read($srcHeap, s, ERSchema.entities)) == _System.array.Length($resolved);
-assume ( forall j: int :: 0<=j && j<_System.array.Length($resolved)  ==>
-$Unbox(read($tarHeap, $resolved, IndexField(j))):ref != null
-&& read($tarHeap, $Unbox(read($tarHeap, $resolved, IndexField(j))):ref, alloc)
-&& dtype($Unbox(read($tarHeap, $resolved, IndexField(j))):ref) == REL$Relation
-&& $Unbox(read($tarHeap, $resolved, IndexField(j))):ref == getTarsBySrcs(Seq#Singleton( $Unbox(read($srcHeap, read($srcHeap, s, ERSchema.entities), IndexField(j))): ref) )
-);
 
-// union
-havoc $newCol;
-assume dtype($newCol) == class._System.array;
-assume $newCol != null && read($tarHeap, $newCol, alloc);
-assume Seq#FromArray($tarHeap,$newCol) == Seq#Append(Seq#FromArray($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])), FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _Field$relations): Field (ref))), Seq#FromArray($tarHeap,$resolved));
 
 
 
 // set,
 assert Seq#Length(stk) >= 2;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) != null;
+havoc $newCol;
+assume dtype($newCol) == class._System.array;
+assume $newCol != null && read($tarHeap, $newCol, alloc);
+assume Seq#FromArray($tarHeap,$newCol) == Seq#Append(Seq#FromArray($tarHeap, read($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), RELSchema.relations)), Seq#FromArray($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1))));
 $tarHeap := update($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), 
-				FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _Field$relations): Field (ref), 
+				RELSchema.relations, 
 				$newCol
 				);
 assume $IsGoodHeap($tarHeap);
@@ -267,27 +258,16 @@ stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box($srcHeap[$Unbox(Seq#Inde
 
 call stk := ASM#Resolve(stk, $srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref);
 
-havoc $resolved;
-assume dtype($resolved) == class._System.array;
-assume _System.array.Length(read($srcHeap, s, ERSchema.relships)) == _System.array.Length($resolved);
-assume ( forall j: int :: 0<=j && j<_System.array.Length($resolved)  ==>
-$Unbox(read($tarHeap, $resolved, IndexField(j))):ref != null
-&& read($tarHeap, $Unbox(read($tarHeap, $resolved, IndexField(j))):ref, alloc)
-&& dtype($Unbox(read($tarHeap, $resolved, IndexField(j))):ref) == REL$Relation
-&& $Unbox(read($tarHeap, $resolved, IndexField(j))):ref == getTarsBySrcs(Seq#Singleton( $Unbox(read($srcHeap, read($srcHeap, s, ERSchema.relships), IndexField(j))): ref) )
-);
-
-// union
-havoc $newCol;
-assume dtype($newCol) == class._System.array;
-assume $newCol != null && read($tarHeap, $newCol, alloc);
-assume Seq#FromArray($tarHeap,$newCol) == Seq#Append(Seq#FromArray($tarHeap, read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])), FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _Field$relations): Field (ref))), Seq#FromArray($tarHeap,$resolved));
 
 // set
 assert Seq#Length(stk) >= 2;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) != null;
+havoc $newCol;
+assume dtype($newCol) == class._System.array;
+assume $newCol != null && read($tarHeap, $newCol, alloc);
+assume Seq#FromArray($tarHeap,$newCol) == Seq#Append(Seq#FromArray($tarHeap, read($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), RELSchema.relations)), Seq#FromArray($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1))));
 $tarHeap := update($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), 
-				FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _Field$relations): Field (ref), 
+				RELSchema.relations, 
 				$newCol
 				);
 				
