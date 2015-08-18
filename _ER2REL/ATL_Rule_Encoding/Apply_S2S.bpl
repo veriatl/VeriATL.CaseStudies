@@ -5,7 +5,7 @@ rule S2S {
 
 
 
-procedure S2S_applys();
+procedure S2S_applyss();
 requires surj_tar_model($srcHeap, $tarHeap);
 requires (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) <: ER$ERSchema ==>
 		read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), alloc) 
@@ -47,8 +47,11 @@ ensures (forall<alpha> $o: ref, $f: Field alpha ::
 		( (dtype($o) == REL$RELSchema && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$ERSchema && ($f == RELSchema.name || $f == RELSchema.relations)) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
 ensures $HeapSucc(old($tarHeap), $tarHeap);
 ensures surj_tar_model($srcHeap, $tarHeap);
-
-implementation S2S_applys()
+ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+	!read(old($tarHeap), $o, alloc) ==>
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
+		 
+implementation S2S_applyss()
 {
 
 	var $i : int;
@@ -100,6 +103,9 @@ implementation S2S_applys()
 		invariant (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
 		((dtype($o) == REL$RELSchema && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$ERSchema && ($f == RELSchema.name || $f == RELSchema.relations)) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
+		invariant (forall<alpha> $o: ref, $f: Field alpha :: 
+	!read(old($tarHeap), $o, alloc) ==>
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
 	{
 		link := Seq#Index(links, $i);		
 		call S2S_apply(link);
@@ -118,8 +124,10 @@ procedure S2S_apply(in: ref) returns()
   free requires Map#Domain($linkHeap[in, TransientLink#target])[_t];
   free requires dtype(Map#Elements($linkHeap[in, TransientLink#source])[_s]) <: ER$ERSchema;
   free requires Map#Elements($linkHeap[in, TransientLink#source])[_s] != null;
+  free requires read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_s], alloc);
   free requires dtype(Map#Elements($linkHeap[in, TransientLink#target])[_t]) == REL$RELSchema;
   free requires Map#Elements($linkHeap[in, TransientLink#target])[_t] != null;
+  free requires read($tarHeap, Map#Elements($linkHeap[in, TransientLink#target])[_t], alloc);
   free requires getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])) == Map#Elements($linkHeap[in, TransientLink#target])[_t];
   free requires dtype(read($srcHeap,  Map#Elements($linkHeap[in, TransientLink#source])[_s], ERSchema.entities)) == class._System.array;
   free requires dtype(read($srcHeap,  Map#Elements($linkHeap[in, TransientLink#source])[_s], ERSchema.relships)) == class._System.array;
@@ -149,7 +157,8 @@ procedure S2S_apply(in: ref) returns()
   // frame properties
   ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
-		((dtype($o) == REL$RELSchema && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$ERSchema && ($f == RELSchema.name || $f == RELSchema.relations)) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
+		(Seq#Length(getTarsBySrcs_inverse($o)) == 1 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$ERSchema && ( dtype($o) <: REL$RELSchema && ($f == RELSchema.name || $f == RELSchema.relations || $f == RELSchema.relations))) 
+		|| (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
   // frame properties
   ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) && $o != getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])) ==> 
@@ -157,6 +166,9 @@ procedure S2S_apply(in: ref) returns()
   );	
   ensures $HeapSucc(old($tarHeap), $tarHeap);
   ensures surj_tar_model($srcHeap, $tarHeap);
+  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+	!read(old($tarHeap), $o, alloc) ==>
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
 {
 
 var stk: Seq BoxType;
