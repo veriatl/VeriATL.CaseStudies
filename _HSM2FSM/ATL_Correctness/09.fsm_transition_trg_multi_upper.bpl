@@ -52,14 +52,17 @@ requires (forall t: ref::
 	(exists sm: ref:: sm!=null && read($srcHeap,sm,alloc) && dtype(sm)==HSM$StateMachine&& read($srcHeap,t,HSM$Transition.stateMachine)==sm)
 );
 modifies $tarHeap,$linkHeap;
-// post8a: fsm_transition_trg_multi_upper
- ensures (forall t: ref::
+// post8b: fsm_transition_trg_multi_upper
+ensures (forall t: ref::
 	t!=null && read($tarHeap,t,alloc) && dtype(t)==FSM$Transition
 	==>
-	(read($tarHeap,read($tarHeap,t,FSM$Transition.target),alloc)
-	&& read($tarHeap,t,FSM$Transition.target)!=null
-	&& dtype(read($tarHeap,t,FSM$Transition.target)) <: FSM$AbstractState)
-);
+	(forall st1,st2: ref:: 
+		st1!=null && read($tarHeap,st1,alloc) && dtype(st1)<:FSM$AbstractState &&
+		st2!=null && read($tarHeap,st2,alloc) && dtype(st2)<:FSM$AbstractState &&
+		read($tarHeap,t,FSM$Transition.target) == st1 &&
+		read($tarHeap,t,FSM$Transition.target) == st2
+			==>
+		st1 == st2));
 {
 
 	call init_tar_model(); 
@@ -81,6 +84,7 @@ modifies $tarHeap,$linkHeap;
 	call T2TA_applyAll();
 	call T2TB_applyAll();
 	call T2TC_applyAll();
+	
 
 
 

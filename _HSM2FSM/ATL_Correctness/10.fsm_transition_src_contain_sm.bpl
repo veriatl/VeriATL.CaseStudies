@@ -90,7 +90,7 @@ read($srcHeap,trg,alloc)
 			==>
 		sm1 == sm2));
 modifies $tarHeap,$linkHeap;
-// post6: fsm_transition_src_contain_sm
+// post10: fsm_transition_src_contain_sm
 ensures (forall t,src: ref::
 	t!=null && read($tarHeap,t,alloc) && dtype(t)==FSM$Transition &&
 	src!=null && read($tarHeap,src,alloc) && dtype(src)<:FSM$AbstractState &&

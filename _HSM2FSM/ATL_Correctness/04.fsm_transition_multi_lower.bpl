@@ -57,6 +57,12 @@ modifies $tarHeap,$linkHeap;
 ensures (forall t: ref::
 	t!=null && read($tarHeap,t,alloc) && dtype(t)==FSM$Transition
 	==>
+	read($tarHeap,t,FSM$Transition.stateMachine) != null && read($tarHeap,read($tarHeap,t,FSM$Transition.stateMachine),alloc)
+);
+// post4a: fsm_transition_multi_lower, another way of writing it, also proveable. ocl compiler doesn't compile this way though, due to the completeness.
+ensures (forall t: ref::
+	t!=null && read($tarHeap,t,alloc) && dtype(t)==FSM$Transition
+	==>
 	(exists sm: ref:: sm!=null && read($tarHeap,sm,alloc) && dtype(sm)==FSM$StateMachine&& read($tarHeap,t,FSM$Transition.stateMachine)==sm)
 );
 {
