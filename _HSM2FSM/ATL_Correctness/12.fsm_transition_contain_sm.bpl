@@ -110,6 +110,20 @@ read($tarHeap,trg,alloc)
 		read($tarHeap,trg,FSM$AbstractState.stateMachine) == sm2
 			==>
 		sm1 == sm2));
+// post9: fsm_transition_contain_sm, compiled by OCL2Boogie		
+ensures (forall t:ref :: {read($tarHeap,t,alloc)}
+  t!=null && read($tarHeap,t,alloc) && dtype(t)==FSM$Transition
+    ==> 
+(forall s1,s2:ref :: {read($tarHeap,s1,alloc),read($tarHeap,s2,alloc)}
+  s1!=null && read($tarHeap,s1,alloc) && dtype(s1)<:FSM$AbstractState &&
+  s2!=null && read($tarHeap,s2,alloc) && dtype(s2)<:FSM$AbstractState 
+    ==> read($tarHeap, t, FSM$Transition.source) == s1 && read($tarHeap, t, FSM$Transition.target) == s2 ==> 
+(forall sm1,sm2:ref :: {read($tarHeap,sm1,alloc), read($tarHeap,sm2,alloc)}
+  sm1!=null && read($tarHeap,sm1,alloc) && dtype(sm1)<:FSM$StateMachine &&
+  sm2!=null && read($tarHeap,sm2,alloc) && dtype(sm2)<:FSM$StateMachine 
+    ==> read($tarHeap, s1, FSM$AbstractState.stateMachine) == sm1 && read($tarHeap, s2, FSM$AbstractState.stateMachine) == sm2 ==> sm1 == sm2)
+)
+);
 {
 
 	call init_tar_model(); 
