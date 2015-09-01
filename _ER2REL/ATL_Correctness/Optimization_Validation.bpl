@@ -26,7 +26,8 @@
 */
 
 
-implementation EA2A_match () returns ()
+procedure EA2A_match () returns ()
+modifies $tarHeap, $linkHeap;
 {
 var stk: Seq BoxType;
 var $i: int;
@@ -56,7 +57,7 @@ while($i<Seq#Length(obj#4))
 			Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$ERAttribute ==>
 			(forall o: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Entity),o) ==>		
 			o!=null && read($srcHeap, o, alloc) && dtype(o) == ER$Entity	==>
-				$srcHeap[Seq#Index(obj#4,i), ERAttribute.entity] == o ==>
+				$srcHeap[Seq#Index(obj#4,i), ER$ERAttribute.entity] == o ==>
 					getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o))!=null 
 					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o)), alloc)
 			));
@@ -78,7 +79,7 @@ while($i<Seq#Length(obj#4))
 	  );
 	  invariant (forall j: int:: 0<=j &&j <$j ==>			
 			Seq#Index(obj#11,j)!=null && read($srcHeap, Seq#Index(obj#11,j), alloc) && dtype(Seq#Index(obj#11,j)) == ER$Entity	==>
-				$srcHeap[Seq#Index(obj#4,$i), ERAttribute.entity] == Seq#Index(obj#11,j) ==>
+				$srcHeap[Seq#Index(obj#4,$i), ER$ERAttribute.entity] == Seq#Index(obj#11,j) ==>
 					getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$i)),Seq#Index(obj#11,j)))!=null 
 					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$i)),Seq#Index(obj#11,j))), alloc)
 			);
@@ -86,7 +87,7 @@ while($i<Seq#Length(obj#4))
 			Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$ERAttribute ==>
 			(forall o: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Entity),o) ==>		
 			o!=null && read($srcHeap, o, alloc) && dtype(o) == ER$Entity	==>
-				$srcHeap[Seq#Index(obj#4,i), ERAttribute.entity] == o ==>
+				$srcHeap[Seq#Index(obj#4,i), ER$ERAttribute.entity] == o ==>
 					getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o))!=null 
 					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o)), alloc)
 			));
@@ -115,7 +116,7 @@ while($i<Seq#Length(obj#4))
 		label_20:
 			assume !cond#19;
 
-			//assert $srcHeap[att, ERAttribute.entity] == ent;
+			//assert $srcHeap[att, ER$ERAttribute.entity] == ent;
 			
 			call stk := OpCode#GetASM(stk);
 			
@@ -213,7 +214,7 @@ assert (forall p: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$E
 			p!=null && read($srcHeap, p, alloc) && dtype(p) == ER$ERAttribute ==>
 			(forall o: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Entity),o) ==>		
 			o!=null && read($srcHeap, o, alloc) && dtype(o) == ER$Entity	==>
-				$srcHeap[p, ERAttribute.entity] == o ==>
+				$srcHeap[p, ER$ERAttribute.entity] == o ==>
 					getTarsBySrcs(Seq#Build(Seq#Singleton(p),o))!=null 
 					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(p),o)), alloc)
 			));

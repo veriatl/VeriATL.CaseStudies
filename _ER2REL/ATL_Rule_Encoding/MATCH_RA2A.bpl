@@ -3,115 +3,91 @@ rule RA2A { from att : ER!ERAttribute, rs  : ER!Relship ( att.relship = rs )
 	        to t : REL!RELAttribute
 			       ( name <- att.name, isKey <- att.isKey, relation <- rs ) }
 */
+function printGuard_RA2A(hp: HeapType, att: ref,rs: ref): bool
+{  read(hp, att, ER$ERAttribute.relship) == rs  }
 
 
+procedure RA2A_matchAllTest() returns ();
+  requires (forall att,rs: ref :: att!=null && read($srcHeap, att, alloc) && dtype(att) <: ER$ERAttribute 
+ && rs!=null && read($srcHeap, rs, alloc) && dtype(rs) <: ER$Relship 
+ ==>
+ read($srcHeap, att, ER$ERAttribute.relship) == rs  ==>
+getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)) ==null || !read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)), alloc)); 
+  modifies $tarHeap,$linkHeap;
+// Rule Outcome
+  ensures (forall att,rs: ref ::
+att!=null && read($srcHeap, att, alloc) && dtype(att) <: ER$ERAttribute 
+ && rs!=null && read($srcHeap, rs, alloc) && dtype(rs) <: ER$Relship 
+ ==>
+ read($srcHeap, att, ER$ERAttribute.relship) == rs  ==>
+getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)) !=null 
+&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)), alloc)
+&& dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs))) <: REL$RELAttribute);
+// Frame Condition
+  ensures (forall<alpha> $o : ref, $f: Field alpha ::
+	($o == null 
+	|| read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) 
+	|| ((dtype($o) <: REL$RELAttribute) && Seq#Length(getTarsBySrcs_inverse($o)) == 2 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$ERAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) <: ER$Relship && $f==alloc )));
+  free ensures $HeapSucc(old($tarHeap), $tarHeap);
+  free ensures $HeapSucc(old($linkHeap), $linkHeap);
+  free ensures surj_tar_model($srcHeap, $tarHeap);
 
 
-procedure RA2A_matchTest();
-requires (forall att: ref :: att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute ==> 
-			(forall rs: ref :: rs!=null && read($srcHeap, rs, alloc) && dtype(rs) == ER$Relship ==> 
-				$srcHeap[att, ERAttribute.relship] == rs ==>
-				getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs))==null || !read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)), alloc)));
-modifies $tarHeap,$linkHeap;
-ensures (forall att: ref :: att!=null && read($srcHeap, att, alloc) && dtype(att) == ER$ERAttribute ==> 
-			 (forall rs: ref :: rs!=null && read($srcHeap, rs, alloc) && dtype(rs) == ER$Relship ==> 
-				$srcHeap[att, ERAttribute.relship] == rs ==>
-				getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs))!=null 
-				&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs)), alloc)
-				&& dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(att),rs))) == REL$RELAttribute
-				));
-ensures (forall<alpha> $o : ref, $f: Field alpha ::
-	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$RELAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Relship && $f==alloc)));
-free ensures $HeapSucc(old($tarHeap), $tarHeap);
-free ensures $HeapSucc(old($linkHeap), $linkHeap);
-free ensures surj_tar_model($srcHeap, $tarHeap);
-
-implementation RA2A_matchTest () returns ()
+implementation RA2A_matchAllTest() returns ()
 {
+
 var stk: Seq BoxType;
-var $i: int;
-var $j: int;
+var $newCol: ref;
 var att: ref;	//slot: 1
 var rs: ref;	//slot: 2
 var self: ref;	//slot: 0
 var obj#4: Seq ref;
+var $counter#5: int;
 var obj#11: Seq ref;
+var $counter#12: int;
 var cond#19: bool;
 var obj#24: ref;
 var obj#40: ref;
-
 stk := OpCode#Aux#InitStk();
 
 call stk := OpCode#Push(stk, _ERAttribute);
 call stk := OpCode#Push(stk, _ER);
 call stk := OpCode#Findme(stk);
 call stk := OpCode#Push(stk, _IN);
-call stk, obj#4 := LIB#AllInstanceFrom(stk, old($srcHeap));
-
+call stk, obj#4 := LIB#AllInstanceFrom(stk, $srcHeap);
 obj#4 := $Unbox(Seq#Index(stk, Seq#Length(stk)-1));
-$i:=0;
+$counter#5:=0;
 call stk := OpCode#Pop(stk);
-
-while($i<Seq#Length(obj#4))
-  invariant $i<=Seq#Length(obj#4);
-  invariant (forall i: int:: 0<=i &&i <$i ==>			
-		Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$ERAttribute		
-  );
-  invariant (forall i: int:: 0<=i &&i <$i ==>			
-			Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$ERAttribute ==>
-			(forall o: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Relship),o) ==>		
-			o!=null && read($srcHeap, o, alloc) && dtype(o) == ER$Relship	==>
-				$srcHeap[Seq#Index(obj#4,i), ERAttribute.relship] == o ==>
-					getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o))!=null 
-					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o)), alloc)
-					&& dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o))) == REL$RELAttribute
-			));
-  invariant (forall<alpha> $o : ref, $f: Field alpha ::
-	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$RELAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Relship && $f==alloc)));
-{ 
-	stk := Seq#Build(stk, $Box(Seq#Index(obj#4, $i)));
-	call stk, att := OpCode#Store(stk);
-	call stk := OpCode#Push(stk, _Relship);
-	call stk := OpCode#Push(stk, _ER);
-	call stk := OpCode#Findme(stk);
-	call stk := OpCode#Push(stk, _IN);
-	call stk, obj#11 := LIB#AllInstanceFrom(stk, old($srcHeap));
-	obj#11 := $Unbox(Seq#Index(stk, Seq#Length(stk)-1));
-	$j:=0;
-	call stk := OpCode#Pop(stk);
-
-	
-	while($j<Seq#Length(obj#11))
-	  invariant $j<=Seq#Length(obj#11);
-	  invariant (forall j: int:: 0<=j &&j <$j ==>			
-		Seq#Index(obj#11,j)!=null && read($srcHeap, Seq#Index(obj#11,j), alloc) && dtype(Seq#Index(obj#11,j)) == ER$Relship		
-	  );
-	  invariant (forall j: int:: 0<=j &&j <$j ==>			
-			Seq#Index(obj#11,j)!=null && read($srcHeap, Seq#Index(obj#11,j), alloc) && dtype(Seq#Index(obj#11,j)) == ER$Relship	==>
-				$srcHeap[Seq#Index(obj#4,$i), ERAttribute.relship] == Seq#Index(obj#11,j) ==>
-					getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$i)),Seq#Index(obj#11,j)))!=null 
-					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$i)),Seq#Index(obj#11,j))), alloc)
-					&& dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$i)),Seq#Index(obj#11,j)))) == REL$RELAttribute
-			);
-	  invariant (forall i: int:: 0<=i &&i <$i ==>			
-			Seq#Index(obj#4,i)!=null && read($srcHeap, Seq#Index(obj#4,i), alloc) && dtype(Seq#Index(obj#4,i)) == ER$ERAttribute ==>
-			(forall o: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Relship),o) ==>		
-			o!=null && read($srcHeap, o, alloc) && dtype(o) == ER$Relship	==>
-				$srcHeap[Seq#Index(obj#4,i), ERAttribute.relship] == o ==>
-					getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o))!=null 
-					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o)), alloc)
-					&& dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,i)),o))) == REL$RELAttribute
-			));
-	  invariant (forall<alpha> $o : ref, $f: Field alpha ::
-	($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || (dtype($o) == REL$RELAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) == ER$ERAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) == ER$Relship && $f==alloc)));
-	{ 
-stk := Seq#Build(stk, $Box(Seq#Index(obj#11, $j)));
+while($counter#5<Seq#Length(obj#4)) 
+invariant $counter#5 <= Seq#Length(obj#4);
+invariant (forall _att: ref :: _att != null && read($srcHeap, _att, alloc) && dtype(_att) <: ER$ERAttribute ==> Seq#Contains(obj#4,_att));
+invariant (forall _$counter#5: int :: 0<= _$counter#5 && _$counter#5< $counter#5 ==> true ==> (Seq#Index(obj#4,_$counter#5)!=null && read($srcHeap, Seq#Index(obj#4,_$counter#5), alloc) && dtype(Seq#Index(obj#4,_$counter#5)) <: ER$ERAttribute ==> (forall __rs:ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Relship),__rs) ==> printGuard_RA2A($srcHeap,Seq#Index(obj#4,_$counter#5),__rs) ==> getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,_$counter#5)), __rs)) != null &&read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,_$counter#5)), __rs)), alloc) && dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,_$counter#5)), __rs))) <: REL$RELAttribute)));
+invariant (forall<alpha> $o : ref, $f: Field alpha :: ($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || ((dtype($o) <: REL$RELAttribute) && Seq#Length(getTarsBySrcs_inverse($o)) == 2 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$ERAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) <: ER$Relship && $f==alloc )));
+{ stk := Seq#Build(stk, $Box(Seq#Index(obj#4, $counter#5)));
+call stk, att := OpCode#Store(stk);
+call stk := OpCode#Push(stk, _Relship);
+call stk := OpCode#Push(stk, _ER);
+call stk := OpCode#Findme(stk);
+call stk := OpCode#Push(stk, _IN);
+call stk, obj#11 := LIB#AllInstanceFrom(stk, $srcHeap);
+obj#11 := $Unbox(Seq#Index(stk, Seq#Length(stk)-1));
+$counter#12:=0;
+call stk := OpCode#Pop(stk);
+while($counter#12<Seq#Length(obj#11)) 
+invariant $counter#5 <= Seq#Length(obj#4);
+invariant (forall _att: ref :: _att != null && read($srcHeap, _att, alloc) && dtype(_att) <: ER$ERAttribute ==> Seq#Contains(obj#4,_att));
+invariant (forall _$counter#5: int :: 0<= _$counter#5 && _$counter#5< $counter#5 ==> true ==> (Seq#Index(obj#4,_$counter#5)!=null && read($srcHeap, Seq#Index(obj#4,_$counter#5), alloc) && dtype(Seq#Index(obj#4,_$counter#5)) <: ER$ERAttribute ==> (forall __rs:ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Relship),__rs) ==> printGuard_RA2A($srcHeap,Seq#Index(obj#4,_$counter#5),__rs) ==> getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,_$counter#5)), __rs)) != null &&read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,_$counter#5)), __rs)), alloc) && dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,_$counter#5)), __rs))) <: REL$RELAttribute)));
+invariant (forall<alpha> $o : ref, $f: Field alpha :: ($o == null || read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f) || ((dtype($o) <: REL$RELAttribute) && Seq#Length(getTarsBySrcs_inverse($o)) == 2 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$ERAttribute && dtype(Seq#Index(getTarsBySrcs_inverse($o), 1)) <: ER$Relship && $f==alloc )));
+invariant $counter#12 <= Seq#Length(obj#11);
+invariant (forall _rs: ref :: _rs != null && read($srcHeap, _rs, alloc) && dtype(_rs) <: ER$Relship ==> Seq#Contains(obj#11,_rs));
+invariant (forall _$counter#12: int :: 0<= _$counter#12 && _$counter#12< $counter#12 ==> true ==> (Seq#Index(obj#11,_$counter#12)!=null && read($srcHeap, Seq#Index(obj#11,_$counter#12), alloc) && dtype(Seq#Index(obj#11,_$counter#12)) <: ER$Relship ==>printGuard_RA2A($srcHeap,Seq#Index(obj#4,$counter#5),Seq#Index(obj#11,_$counter#12)) ==> getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$counter#5)), Seq#Index(obj#11,_$counter#12))) != null &&read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$counter#5)), Seq#Index(obj#11,_$counter#12))), alloc) && dtype(getTarsBySrcs(Seq#Build(Seq#Singleton(Seq#Index(obj#4,$counter#5)), Seq#Index(obj#11,_$counter#12)))) <: REL$RELAttribute));
+{ stk := Seq#Build(stk, $Box(Seq#Index(obj#11, $counter#12)));
 call stk, rs := OpCode#Store(stk);
 call stk := OpCode#Load(stk, att);
 assert Seq#Length(stk) >= 1;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
 assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
-stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$relship): Field (ref))));
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),ER$ERAttribute.relship)));
 call stk := OpCode#Load(stk, rs);
 call stk := OCLAny#Equal(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-2)): ref,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref);
 call stk := OCL#Boolean#Not(stk);
@@ -122,7 +98,7 @@ label_20:
 call stk := OpCode#GetASM(stk);
 assert Seq#Length(stk) >= 1;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
-stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($linkHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$links): Field (Set ref))));
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($linkHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),ASM.links)));
 call stk := OpCode#Push(stk, _TransientLink);
 call stk := OpCode#Push(stk, _#native);
 assert Seq#Length(stk) >= 2;
@@ -161,23 +137,9 @@ call stk := NTransientLink#addTargetElement(stk,$Unbox(Seq#Index(stk, Seq#Length
 call stk := OpCode#Pusht(stk);
 stk := Seq#Take(stk, Seq#Length(stk)-3);
 label_44:
-$j := $j+1;
-		
-		
-		
-	}
-
-	$i := $i+1;
-	
+$counter#12 := $counter#12+1;
 }
-
-assert (forall p: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$ERAttribute),p) ==>			
-			p!=null && read($srcHeap, p, alloc) && dtype(p) == ER$ERAttribute ==>
-			(forall o: ref :: Seq#Contains(Fun#LIB#AllInstanceFrom(old($srcHeap),ER$Relship),o) ==>		
-			o!=null && read($srcHeap, o, alloc) && dtype(o) == ER$Relship	==>
-				$srcHeap[p, ERAttribute.relship] == o ==>
-					getTarsBySrcs(Seq#Build(Seq#Singleton(p),o))!=null 
-					&& read($tarHeap, getTarsBySrcs(Seq#Build(Seq#Singleton(p),o)), alloc)
-			));
+$counter#5 := $counter#5+1;
+}
 
 }

@@ -18,11 +18,11 @@ Proj2 = "../_ER2REL/"			# task 2
 Proj3 = "../_ResolveTemp/"		# task 3
 
 # PROJ TO VERIFY
-Projs = [Proj1]	
+Projs = [Proj3]	
 
 # WHAT OPTION TO VERIFY EACH PROJ
-Projs_option_map = { Proj1: { _OPT_VERIFICATION}, 
-                     Proj2: { _OPT_VALIDATION},    
+Projs_option_map = { Proj1: { _OPT_VALIDATION, _OPT_VERIFICATION}, 
+                     Proj2: { _OPT_VALIDATION, _OPT_VERIFICATION},    
                      Proj3: {_OPT_VERIFICATION}    }
 
 # BOOGIE ARGS
@@ -160,7 +160,7 @@ def executeSingle(proj,task,opt):
 	
 	
 	print " ========================================================================= "
-	print " * Real:" + lastLine
+	print " * Real:" + out
 	print " * Expected: "+ expect	
 	print " ========================================================================= "
 	

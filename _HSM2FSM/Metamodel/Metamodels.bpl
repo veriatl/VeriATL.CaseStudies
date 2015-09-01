@@ -74,24 +74,8 @@ const classifierTable : [String, String] ClassName;
 
 // ASM-specific
 
-const System.reserved: ClassName;
-const unique Asm: ref;
-  axiom Asm != null;
-  axiom dtype(Asm) <: System.reserved;
-  axiom (forall h:HeapType::read(h,Asm,alloc));
-  
-  
-const unique ASM#Links : Field (Set ref);
-const unique Native$TransientLink: ClassName;
 
-const unique _#native: String;
-const unique _TransientLink: String;
 
-	// see org.eclipse.m2m.atl.engine.emfvm.lib.TransientLink
-const unique TransientLink#source: Field (Map String ref);
-const unique TransientLink#target: Field (Map String ref);
-const unique TransientLink#rule: Field String;
-  axiom classifierTable[_#native, _TransientLink] == Native$TransientLink;
   axiom classifierTable[_FSM, _StateMachine] == FSM$StateMachine;
   axiom classifierTable[_FSM, _RegularState] == FSM$RegularState;
   axiom classifierTable[_FSM, _InitialState] == FSM$InitialState;

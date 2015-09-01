@@ -4,25 +4,38 @@ rule E2R { from s : ER!Entity
 
 */
 
-procedure E2R_applys();
-requires surj_tar_model($srcHeap, $tarHeap);
-requires (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) <: ER$Entity ==>
-		read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), alloc) 
-	 && getTarsBySrcs(Seq#Singleton(r)) != null 
-	 && dtype(getTarsBySrcs(Seq#Singleton(r))) == REL$Relation	);
-modifies $tarHeap;
-// t.name <- s.name
-ensures (forall r: ref :: r!=null && read($srcHeap, r, alloc) && dtype(r) <: ER$Entity ==> 
-		read($tarHeap, getTarsBySrcs(Seq#Singleton(r)), Relation.name) == read($srcHeap, r, Entity.name));
-// frame property
-ensures (forall<alpha> $o: ref, $f: Field alpha :: 
-	$o != null && read(old($tarHeap), $o, alloc) ==>
-		((dtype($o) == REL$Relation && 
-		dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$Entity && $f == Relation.name) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
-ensures $HeapSucc(old($tarHeap), $tarHeap);
-ensures surj_tar_model($srcHeap, $tarHeap);
 
-implementation E2R_applys()
+procedure E2R_applyAllTest() returns();
+  requires surj_tar_model($srcHeap, $tarHeap);
+  requires (forall s: ref :: s!=null && read($srcHeap, s, alloc) && dtype(s) <: ER$Entity 
+ ==>
+ true  ==>
+getTarsBySrcs(Seq#Singleton(s)) !=null 
+&& read($tarHeap, getTarsBySrcs(Seq#Singleton(s)), alloc)
+&& dtype(getTarsBySrcs(Seq#Singleton(s))) <: REL$Relation);
+  modifies $tarHeap;
+// Rule outcome
+
+
+  ensures (forall s: ref :: s!=null && read($srcHeap, s, alloc) && dtype(s) <: ER$Entity 
+ ==>
+ true  ==>
+read($tarHeap, getTarsBySrcs(Seq#Singleton(s)), REL$Relation.name) == read($srcHeap, s, ER$Entity.name));
+
+
+// Frame property
+  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+	!read(old($tarHeap), $o, alloc) ==>
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
+	  || (dtype($o) == class._System.array));
+  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+	$o != null && read(old($tarHeap), $o, alloc) ==>
+		(Seq#Length(getTarsBySrcs_inverse($o)) == 1 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$Entity && ( dtype($o) <: REL$Relation && ($f == REL$Relation.name))) 
+		|| (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
+  ensures $HeapSucc(old($tarHeap), $tarHeap);
+  ensures surj_tar_model($srcHeap, $tarHeap);
+
+implementation E2R_applyAllTest()
 {
 
 	var $i : int;
@@ -40,10 +53,14 @@ implementation E2R_applys()
 		invariant $i <= Seq#Length(links);
 		invariant surj_tar_model($srcHeap, $tarHeap);
 		invariant (forall<alpha> $o: ref, $f: Field alpha :: 
+	!read(old($tarHeap), $o, alloc) ==>
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
+	  || (dtype($o) == class._System.array));
+		invariant (forall<alpha> $o: ref, $f: Field alpha :: 
 			$o != null && read(old($tarHeap), $o, alloc) ==>
-				((dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$Entity && $f == Relation.name) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
+				((dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$Entity && $f == REL$Relation.name) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
 		invariant (forall i: int:: 0<=i &&i <$i ==>			
-			read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_s])), Relation.name) == $srcHeap[Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_s], Entity.name]
+			read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_s])), REL$Relation.name) == $srcHeap[Map#Elements($linkHeap[Seq#Index(links,i), TransientLink#source])[_s], ER$Entity.name]
 		);
 		
 	{
@@ -56,34 +73,58 @@ implementation E2R_applys()
 }
 
 
+procedure E2R_apply(in: ref) returns();
+free requires surj_tar_model($srcHeap, $tarHeap);
+//free requires isValidSrc($srcHeap);
+//free requires isInstTar($tarHeap);
+// link info
+free requires $linkHeap[in, alloc] == true;
+free requires dtype(in) == Native$TransientLink;
+// rule info
+free requires $linkHeap[in, TransientLink#rule]==_E2R;  
+free requires Map#Domain($linkHeap[in, TransientLink#source])[_s];
+free requires dtype(Map#Elements($linkHeap[in, TransientLink#source])[_s]) <: ER$Entity;
+free requires Map#Elements($linkHeap[in, TransientLink#source])[_s] != null;
+free requires read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_s], alloc);
 
-procedure E2R_apply (in: ref) returns ()
-  free requires surj_tar_model($srcHeap, $tarHeap);
-  free requires $linkHeap[in, TransientLink#rule]==_E2R;  
-  free requires $linkHeap[in, alloc] == true;
-  free requires dtype(in) == Native$TransientLink;
-  free requires Map#Domain($linkHeap[in, TransientLink#source])[_s];
-  free requires Map#Domain($linkHeap[in, TransientLink#target])[_t];
-  free requires dtype(Map#Elements($linkHeap[in, TransientLink#source])[_s]) <: ER$Entity;
-  free requires Map#Elements($linkHeap[in, TransientLink#source])[_s] != null;
-  free requires dtype(Map#Elements($linkHeap[in, TransientLink#target])[_t]) == REL$Relation;
-  free requires Map#Elements($linkHeap[in, TransientLink#target])[_t] != null;
-  free requires getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])) == Map#Elements($linkHeap[in, TransientLink#target])[_t];
-  modifies $tarHeap;
-  ensures read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])), Relation.name) == read($srcHeap,Map#Elements($linkHeap[in, TransientLink#source])[_s],Entity.name);
-  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+free requires Map#Domain($linkHeap[in, TransientLink#target])[_t];
+free requires dtype(Map#Elements($linkHeap[in, TransientLink#target])[_t]) <: REL$Relation;
+free requires Map#Elements($linkHeap[in, TransientLink#target])[_t] != null;
+free requires read($tarHeap, Map#Elements($linkHeap[in, TransientLink#target])[_t], alloc);
+
+// Correspondence I/O
+free requires getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])) == Map#Elements($linkHeap[in, TransientLink#target])[_t];
+// Guard
+free requires true ;
+// modifies
+modifies $tarHeap;
+// Rule outcome
+
+ensures read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])), REL$Relation.name) == read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_s], ER$Entity.name);
+
+
+// Frame 
+ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+	!read(old($tarHeap), $o, alloc) ==>
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
+	  || (dtype($o) == class._System.array));
+ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
-		((dtype($o) == REL$Relation && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$Entity && $f == Relation.name) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
-  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+		(Seq#Length(getTarsBySrcs_inverse($o)) == 1 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: ER$Entity && ( dtype($o) <: REL$Relation && ($f == REL$Relation.name))) 
+		|| (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
+ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) && $o != getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_s])) ==> 
 	(read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
-  );	
-  ensures $HeapSucc(old($tarHeap), $tarHeap);
-  ensures surj_tar_model($srcHeap, $tarHeap);
+  );
+// Preserving
+ensures $HeapSucc(old($tarHeap), $tarHeap);
+ensures surj_tar_model($srcHeap, $tarHeap);
+
+implementation E2R_apply (in: ref) returns ()
 {
 
 var stk: Seq BoxType;
-var $i: int;
+var $newCol: ref;
 var t: ref;	//slot: 3
 var s: ref;	//slot: 2
 var self: ref;	//slot: 0
@@ -93,44 +134,33 @@ link := in;
 
 call stk := OpCode#Load(stk, link);
 call stk := OpCode#Push(stk, _s);
-call stk := NTransientLink#getSourceElement(
-				stk,
-				$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),
-				$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
-				
+call stk := NTransientLink#getSourceElement(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
 call stk, s := OpCode#Store(stk);
 call stk := OpCode#Load(stk, link);
 call stk := OpCode#Push(stk, _t);
-call stk := NTransientLink#getTargetElement(
-				stk,
-				$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),
-				$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
+call stk := NTransientLink#getTargetElement(stk,$Unbox(Seq#Index(stk, Seq#Length(stk)-2)),$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
 call stk, t := OpCode#Store(stk);
 call stk := OpCode#Load(stk, t);
 call stk := OpCode#Dup(stk);
 call stk := OpCode#GetASM(stk);
 call stk := OpCode#Load(stk, s);
-
-// get
 assert Seq#Length(stk) >= 1;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
-stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box($srcHeap[$Unbox(Seq#Index(stk, Seq#Length(stk)-1)), FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))), _Field$name): Field (String)]));
-
+assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
+stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),ER$Entity.name)));
 call stk := ASM#Resolve(stk, $srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String);
-
-// set
 assert Seq#Length(stk) >= 2;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) != null;
-$tarHeap := update($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), 
-				FieldOfDecl(dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))), _Field$name): Field (String), 
-				$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
+assert read($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), alloc);
+$tarHeap := update($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)),REL$Relation.name,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
 assume $IsGoodHeap($tarHeap);
 stk := Seq#Take(stk, Seq#Length(stk)-2);
 
 call stk := OpCode#Pop(stk);
 
-
 }
+
+
 
 // properties of each link of e2r rule
 function E2R_links(
