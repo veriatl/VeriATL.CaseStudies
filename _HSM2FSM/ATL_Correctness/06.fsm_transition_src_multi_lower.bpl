@@ -53,7 +53,7 @@ requires (forall t: ref::
 );
 modifies $tarHeap,$linkHeap;
 // post5a: fsm_transition_src_multi_lower
- ensures (forall t: ref::
+ ensures (forall t: ref:: 
 	t!=null && read($tarHeap,t,alloc) && dtype(t)==FSM$Transition
 	==>
 	(read($tarHeap,read($tarHeap,t,FSM$Transition.source),alloc)

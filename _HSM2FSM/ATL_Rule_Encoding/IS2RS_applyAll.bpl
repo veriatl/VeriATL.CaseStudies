@@ -20,11 +20,11 @@ read($tarHeap, getTarsBySrcs(Seq#Singleton(is1)), FSM$AbstractState.stateMachine
 read($tarHeap, getTarsBySrcs(Seq#Singleton(is1)), FSM$AbstractState.name) == read($srcHeap, is1, HSM$AbstractState.name));
 
 
-
 // Frame property
   ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	!read(old($tarHeap), $o, alloc) ==>
-		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
+	  || (dtype($o) == class._System.array));
   ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
 		(Seq#Length(getTarsBySrcs_inverse($o)) == 1 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: HSM$InitialState && ( dtype($o) <: FSM$RegularState && ($f == FSM$AbstractState.stateMachine || $f == FSM$AbstractState.name))) 
@@ -58,7 +58,8 @@ implementation IS2RS_applyAllTest () returns ()
 		);
 		invariant (forall<alpha> $o: ref, $f: Field alpha :: 
 	!read(old($tarHeap), $o, alloc) ==>
-		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
+	  || (dtype($o) == class._System.array));
 	{
 		link := Seq#Index(links, $i);		
 		call IS2RS_apply(link);
@@ -69,42 +70,62 @@ implementation IS2RS_applyAllTest () returns ()
 }
 
 
-procedure IS2RS_apply (in: ref) returns ();
-  free requires surj_tar_model($srcHeap, $tarHeap);
-  free requires $linkHeap[in, TransientLink#rule]==_IS2IS;  
-  free requires $linkHeap[in, alloc] == true;
-  free requires dtype(in) <: Native$TransientLink;
-  free requires Map#Domain($linkHeap[in, TransientLink#source])[_is1];
-  free requires Map#Domain($linkHeap[in, TransientLink#target])[_is2];
-  free requires dtype(Map#Elements($linkHeap[in, TransientLink#source])[_is1]) <:HSM$InitialState;
-  free requires Map#Elements($linkHeap[in, TransientLink#source])[_is1] != null;
-  free requires read($srcHeap,Map#Elements($linkHeap[in, TransientLink#source])[_is1],alloc);
-  free requires dtype(Map#Elements($linkHeap[in, TransientLink#target])[_is2]) <: FSM$RegularState;
-  free requires Map#Elements($linkHeap[in, TransientLink#target])[_is2] != null;
-  free requires read($tarHeap,Map#Elements($linkHeap[in, TransientLink#target])[_is2],alloc);
-  free requires getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_is1])) == Map#Elements($linkHeap[in, TransientLink#target])[_is2];
-  free requires read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_is1], HSM$AbstractState.compositeState)==null;
-  modifies $tarHeap;
-  ensures read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_is1])), FSM$AbstractState.name) == read($srcHeap,Map#Elements($linkHeap[in, TransientLink#source])[_is1],HSM$AbstractState.name);
-  ensures read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_is1])), FSM$AbstractState.stateMachine) == getTarsBySrcs(Seq#Singleton(read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_is1], HSM$AbstractState.stateMachine)));		
-  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+procedure IS2RS_apply(in: ref) returns();
+free requires surj_tar_model($srcHeap, $tarHeap);
+//free requires isValidSrc($srcHeap);
+//free requires isInstTar($tarHeap);
+// link info
+free requires $linkHeap[in, alloc] == true;
+free requires dtype(in) == Native$TransientLink;
+// rule info
+free requires $linkHeap[in, TransientLink#rule]==_IS2RS;  
+free requires Map#Domain($linkHeap[in, TransientLink#source])[_is1];
+free requires dtype(Map#Elements($linkHeap[in, TransientLink#source])[_is1]) <: HSM$InitialState;
+free requires Map#Elements($linkHeap[in, TransientLink#source])[_is1] != null;
+free requires read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_is1], alloc);
+
+free requires Map#Domain($linkHeap[in, TransientLink#target])[_is2];
+free requires dtype(Map#Elements($linkHeap[in, TransientLink#target])[_is2]) <: FSM$RegularState;
+free requires Map#Elements($linkHeap[in, TransientLink#target])[_is2] != null;
+free requires read($tarHeap, Map#Elements($linkHeap[in, TransientLink#target])[_is2], alloc);
+
+// Correspondence I/O
+free requires getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_is1])) == Map#Elements($linkHeap[in, TransientLink#target])[_is2];
+// Guard
+free requires !(read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_is1], HSM$AbstractState.compositeState)==null) ;
+
+free requires dtype(read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_is1], HSM$AbstractState.stateMachine))!= class._System.array;
+// modifies
+modifies $tarHeap;
+// Rule outcome
+
+ensures read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_is1])), FSM$AbstractState.stateMachine) == getTarsBySrcs(Seq#Singleton(read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_is1], HSM$AbstractState.stateMachine)));
+ensures read($tarHeap, getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_is1])), FSM$AbstractState.name) == read($srcHeap, Map#Elements($linkHeap[in, TransientLink#source])[_is1], HSM$AbstractState.name);
+
+
+// Frame 
+ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+	!read(old($tarHeap), $o, alloc) ==>
+		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
+	  || (dtype($o) == class._System.array));
+ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) ==>
-		((dtype($o) <: FSM$RegularState && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: HSM$InitialState && ($f == FSM$AbstractState.name || $f == FSM$AbstractState.stateMachine)) || (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))));
-  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
+		(Seq#Length(getTarsBySrcs_inverse($o)) == 1 && dtype(Seq#Index(getTarsBySrcs_inverse($o), 0)) <: HSM$InitialState && ( dtype($o) <: FSM$RegularState && ($f == FSM$AbstractState.stateMachine || $f == FSM$AbstractState.name))) 
+		|| (read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
+ensures (forall<alpha> $o: ref, $f: Field alpha :: 
 	$o != null && read(old($tarHeap), $o, alloc) && $o != getTarsBySrcs(Seq#Singleton(Map#Elements($linkHeap[in, TransientLink#source])[_is1])) ==> 
 	(read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f))
-  );	
-  ensures $HeapSucc(old($tarHeap), $tarHeap);
-  ensures surj_tar_model($srcHeap, $tarHeap);
-  ensures (forall<alpha> $o: ref, $f: Field alpha :: 
-	!read(old($tarHeap), $o, alloc) ==>
-		 ( read($tarHeap, $o, $f) == read(old($tarHeap), $o, $f)));
+  );
+// Preserving
+ensures $HeapSucc(old($tarHeap), $tarHeap);
+ensures surj_tar_model($srcHeap, $tarHeap);
 		 
+
 implementation IS2RS_apply (in: ref) returns ()
 {
 
 var stk: Seq BoxType;
-var $i: int;
+var $newCol: ref;
 var is2: ref;	//slot: 3
 var is1: ref;	//slot: 2
 var self: ref;	//slot: 0
@@ -127,16 +148,11 @@ call stk := OpCode#Load(stk, is1);
 assert Seq#Length(stk) >= 1;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
 assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
-assert dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))) <: HSM$InitialState;
 stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),HSM$AbstractState.stateMachine)));
-assert $Unbox(top(stk)) == (read($srcHeap, is1, HSM$AbstractState.stateMachine));
-				
 call stk := ASM#Resolve(stk, $srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref);
-assume $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): ref == getTarsBySrcs(Seq#Singleton(read($srcHeap,Map#Elements($linkHeap[in, TransientLink#source])[_is1],HSM$AbstractState.stateMachine)));
 assert Seq#Length(stk) >= 2;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) != null;
 assert read($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), alloc);
-assert dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))) <: FSM$RegularState;
 $tarHeap := update($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)),FSM$AbstractState.stateMachine,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
 assume $IsGoodHeap($tarHeap);
 stk := Seq#Take(stk, Seq#Length(stk)-2);
@@ -147,13 +163,11 @@ call stk := OpCode#Load(stk, is1);
 assert Seq#Length(stk) >= 1;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-1)) != null;
 assert read($srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)),alloc);
-assert dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-1))) <: HSM$InitialState;
 stk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-1), $Box(read($srcHeap,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)),HSM$AbstractState.name)));
 call stk := ASM#Resolve(stk, $srcHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-1)): String);
 assert Seq#Length(stk) >= 2;
 assert $Unbox(Seq#Index(stk, Seq#Length(stk)-2)) != null;
 assert read($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)), alloc);
-assert dtype($Unbox(Seq#Index(stk, Seq#Length(stk)-2))) <: FSM$RegularState;
 $tarHeap := update($tarHeap, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)),FSM$AbstractState.name,$Unbox(Seq#Index(stk, Seq#Length(stk)-1)));
 assume $IsGoodHeap($tarHeap);
 stk := Seq#Take(stk, Seq#Length(stk)-2);
@@ -161,6 +175,7 @@ stk := Seq#Take(stk, Seq#Length(stk)-2);
 call stk := OpCode#Pop(stk);
 
 }
+
 
 
 

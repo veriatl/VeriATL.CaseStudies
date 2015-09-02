@@ -1,6 +1,7 @@
 // ------------------------------------------------------------
 // -- Source Metamodel Modelling ------------------------------
 // ------------------------------------------------------------
+
 const unique HSM$StateMachine: ClassName extends  complete;
 const unique HSM$StateMachine.transitions: Field ref;
 const unique HSM$StateMachine.states: Field ref;
@@ -17,7 +18,6 @@ const unique HSM$AbstractState: ClassName extends  complete;
 const unique HSM$AbstractState.stateMachine: Field ref;
 const unique HSM$AbstractState.name: Field String;
 const unique HSM$AbstractState.compositeState: Field ref;
-	
 
 const unique HSM$InitialState: ClassName extends HSM$AbstractState complete;
 
@@ -25,6 +25,8 @@ const unique HSM$RegularState: ClassName extends HSM$AbstractState complete;
 
 const unique HSM$CompositeState: ClassName extends HSM$AbstractState complete;
 const unique HSM$CompositeState.states: Field ref;
+
+
 
 
 const unique FSM$StateMachine: ClassName extends  complete;
