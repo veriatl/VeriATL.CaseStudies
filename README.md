@@ -22,10 +22,12 @@ VeriATL system is driven by two essential Boogie Libraries:
 
 Case Studies
 ------
-Currently, we apply VeriATL on three case studies
+Currently, we apply VeriATL on four case studies
 - ER2REL - ER diagram to Relational schema. [portal](https://github.com/VeriATL/VeriATL/tree/master/_ER2REL)
 - HSM2FSM - Hierarchical State Machine to Flatten State Machine. [portal](https://github.com/VeriATL/VeriATL/tree/master/_HSM2FSM)
 - ResolveTemp - to demonstrate ResolveTemp operation of ATL. [portal](https://github.com/VeriATL/VeriATL/tree/master/_ResolveTemp)
+- Resolving Algorithm - to verify the functional correctness of resolving algorithm of ATL.
+[portal](https://github.com/VeriATL/VeriATL/tree/master/_Resolving_Algorithm)
 
 These case studies are organized into:
 - Metamodels encoding, in the directory of /Metamodel/
@@ -43,7 +45,7 @@ Finally, to ensure validity of our approach. The regression are executed on ever
 
 We also record the result and performance of regression tests for reader who interested. They can be found in the /UnitTesting/ directory of each case study.
 
-
+Link to VeriGT
 ------
-
+VeriGT is a verifier to verify the functional correctness of SimpleGT graph transformations. SimpleGT is an experimental graph transformation language that is based on the EMFTVM bytecode language ([Portal](https://wiki.eclipse.org/ATL/EMFTVM), which can be seen as a superset of ASM). The VeriGT project can be found at [Portal](https://github.com/veriatl/VeriGT).
 
